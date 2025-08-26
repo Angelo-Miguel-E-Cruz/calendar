@@ -1,103 +1,224 @@
-import Image from "next/image";
+"use client"
+
+import { Draggable, DropArg } from "@fullcalendar/interaction"
+import { Fragment, useEffect, useState } from "react";
+import { generateID } from "@/utils/exports";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import Calendar from "@/components/Calendar";
+import Modal from "@/components/Modals";
+import { Event } from "@/utils/exports";
+
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // sample data
+  const [events, setEvents] = useState<Event[]>([
+    { title: 'event 1', id: 1, start: "today", allDay: true },
+    { title: 'event 2', id: 2, start: "today", allDay: false },
+    { title: 'event 3', id: 3, start: "tomorrow", allDay: true },
+    { title: 'event 4', id: 4, start: "tomorrow", allDay: false },
+  ])
+
+  // other states; make useReducer !
+  const [allEvents, setAllEvents] = useState<Event[]>([])
+  const [showModal, setShowModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [newEvent, setNewEvent] = useState<Event>({
+    id: 0,
+    title: '',
+    start: '',
+    allDay: false
+  })
+
+  useEffect(() => {
+    let draggableElement = document.getElementById('draggable-el')
+
+    if (draggableElement) {
+      new Draggable(draggableElement, {
+        itemSelector: ".fc-event",
+        eventData: function (eventEl) {
+          let title = eventEl.getAttribute("title")
+          let id = eventEl.getAttribute("data-id")
+          let start = eventEl.getAttribute("data-start")
+          return { title, id, start }
+        }
+      })
+    }
+  }, [])
+
+  // functions
+
+  const handleDateClick = (arg: { date: Date, allDay: boolean }) => {
+    setNewEvent({
+      ...newEvent,
+      id: generateID(),
+      start: arg.date,
+      allDay: arg.allDay
+    })
+    setShowModal(true)
+  }
+
+  const addEvent = (data: DropArg) => {
+    const event = {
+      ...newEvent,
+      id: generateID(),
+      title: data.draggedEl.innerText,
+      start: data.date.toISOString(),
+      allDay: data.allDay
+    }
+    setAllEvents([...allEvents, event])
+  }
+
+  const handleDeleteModal = (data: { event: { id: string } }) => {
+    setShowDeleteModal(true)
+    setDeleteId(Number(data.event.id))
+  }
+
+  const handleDelete = () => {
+    setAllEvents(allEvents.filter(event => event.id !== deleteId))
+    setShowDeleteModal(false)
+    setDeleteId(null)
+  }
+
+  const handleCloseModal = () => {
+    setNewEvent({
+      id: 0,
+      title: '',
+      start: '',
+      allDay: false
+    })
+    setShowModal(false)
+    setShowDeleteModal(false)
+    setDeleteId(null)
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setNewEvent({
+      ...newEvent,
+      title: e.target.value
+    })
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setAllEvents([...allEvents, newEvent])
+    setShowModal(false)
+    setNewEvent({
+      title: '',
+      start: '',
+      allDay: false,
+      id: 0
+    })
+  }
+
+  return (
+    <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <div className="grid grid-cols-10">
+        <Calendar
+          allEvents={allEvents}
+          handleDateClick={handleDateClick}
+          addEvent={addEvent}
+          handleDeleteModal={handleDeleteModal}
+        />
+
+        <div id="draggable-el" className="ml-8 w-full border-2 p-2 rounded-md mt-16 lg:h-1/2 bg-violet-50">
+          <h1 className="font-bold text-lg text-center">Drag Event</h1>
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="fc-event border-2 p-1 m-2 w-full rounded-md ml-auto text-center bg-white cursor-pointer"
+              title={event.title}
+              data-id={event.id}
+              data-start={event.start}>
+              {event.title}
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={setShowDeleteModal}>
+        <DialogPanel className="relative transform overflow-hidden rounded-lg
+                   bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+            <div className="sm:flex sm:items-start">
+              <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center 
+                      justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+              </div>
+              <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                  Delete Event
+                </DialogTitle>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Are you sure you want to delete this event?
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <button type="button" className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm 
+                      font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto" onClick={handleDelete}>
+              Delete
+            </button>
+            <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 
+                      shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogPanel>
+      </Modal>
+
+      <Modal
+        isOpen={showModal}
+        onClose={setShowModal}>
+        <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+          <div>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+              <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
+            </div>
+            <div className="mt-3 text-center sm:mt-5">
+              <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                Add Event
+              </DialogTitle>
+              <form action="submit" onSubmit={handleSubmit}>
+                <div className="mt-2">
+                  <input type="text" name="title" className="block w-full rounded-md border-0 py-1.5 text-gray-900 
+                            shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
+                            focus:ring-2 
+                            focus:ring-inset focus:ring-violet-600 
+                            sm:text-sm sm:leading-6"
+                    value={newEvent.title} onChange={(e) => handleChange(e)} placeholder="Title" />
+                </div>
+                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                  <button
+                    type="submit"
+                    className="inline-flex w-full justify-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:col-start-2 disabled:opacity-25"
+                    disabled={newEvent.title === ''}
+                  >
+                    Create
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                    onClick={handleCloseModal}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </DialogPanel>
+      </Modal>
+    </main>
   );
 }

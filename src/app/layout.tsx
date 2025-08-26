@@ -27,6 +27,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+
+        <nav className="flex justify-between mb-12 border-b border-b-violet-100 p-4">
+          <h1 className="font-bold text-2xl text-gray-700">Calendar</h1>
+        </nav>
+
         {children}
       </body>
     </html>
