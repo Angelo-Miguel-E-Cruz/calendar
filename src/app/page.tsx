@@ -1,14 +1,94 @@
 "use client"
 
 import { Draggable, DropArg } from "@fullcalendar/interaction"
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { generateID } from "@/utils/exports";
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { DialogPanel, DialogTitle } from "@headlessui/react";
 import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 import Calendar from "@/components/Calendar";
 import Modal from "@/components/Modals";
 import { Event } from "@/utils/exports";
 
+interface AppState {
+  allEvents: Event[],
+  newEvent: Event,
+  deleteId: number | null,
+  modals: {
+    showModal: boolean,
+    showDeleteModal: boolean
+  },
+}
+
+const initialState: AppState = {
+  allEvents: [],
+  newEvent: {
+    id: 0,
+    title: '',
+    start: '',
+    allDay: false
+  },
+  deleteId: null,
+  modals: {
+    showModal: false,
+    showDeleteModal: false
+  }
+}
+
+type ActionType =
+  | { type: 'ADD_EVENT', payload: Event }
+  | { type: 'REMOVE_EVENT', payload: number | null }
+
+  | { type: 'TOGGLE_MODAL', payload: { modal: keyof AppState['modals'], isOpen: boolean } }
+
+  | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: number | Event } }
+
+  | { type: 'SET_NEW_EVENT', payload: Partial<Event> }
+
+  | { type: 'RESET_PROPERTY', payload: keyof AppState }
+function Reducer(state: AppState, action: ActionType) {
+  const { type } = action
+
+  switch (type) {
+    case 'ADD_EVENT':
+      return {
+        ...state,
+        allEvents: [...state.allEvents, action.payload]
+      }
+    case 'REMOVE_EVENT':
+      return {
+        ...state,
+        allEvents: state.allEvents.filter(events => events.id !== action.payload)
+      }
+    case 'TOGGLE_MODAL':
+      return {
+        ...state,
+        modals: {
+          ...state.modals,
+          [action.payload.modal]: action.payload.isOpen
+        }
+      }
+    case 'SET_PROPERTY':
+      return {
+        ...state,
+        [action.payload.type]: action.payload.value
+      }
+    case 'RESET_PROPERTY':
+      return {
+        ...state,
+        [action.payload]: initialState
+      }
+    case 'SET_NEW_EVENT':
+      return {
+        ...state,
+        newEvent: {
+          ...state.newEvent,
+          ...action.payload
+        }
+      }
+    default:
+      return state
+  }
+}
 
 export default function Home() {
 
@@ -20,17 +100,7 @@ export default function Home() {
     { title: 'event 4', id: 4, start: "tomorrow", allDay: false },
   ])
 
-  // other states; make useReducer !
-  const [allEvents, setAllEvents] = useState<Event[]>([])
-  const [showModal, setShowModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleteId, setDeleteId] = useState<number | null>(null)
-  const [newEvent, setNewEvent] = useState<Event>({
-    id: 0,
-    title: '',
-    start: '',
-    allDay: false
-  })
+  const [state, dispatch] = useReducer(Reducer, initialState)
 
   useEffect(() => {
     let draggableElement = document.getElementById('draggable-el')
@@ -51,73 +121,65 @@ export default function Home() {
   // functions
 
   const handleDateClick = (arg: { date: Date, allDay: boolean }) => {
-    setNewEvent({
-      ...newEvent,
-      id: generateID(),
-      start: arg.date,
-      allDay: arg.allDay
+    dispatch({
+      type: 'SET_NEW_EVENT', payload: {
+        id: generateID(),
+        start: arg.date,
+        allDay: arg.allDay
+      }
     })
-    setShowModal(true)
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: true } })
   }
 
   const addEvent = (data: DropArg) => {
     const event = {
-      ...newEvent,
+      ...state.newEvent,
       id: generateID(),
       title: data.draggedEl.innerText,
       start: data.date.toISOString(),
       allDay: data.allDay
     }
-    setAllEvents([...allEvents, event])
+    dispatch({ type: 'ADD_EVENT', payload: event })
   }
 
   const handleDeleteModal = (data: { event: { id: string } }) => {
-    setShowDeleteModal(true)
-    setDeleteId(Number(data.event.id))
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: true } })
+    dispatch({ type: 'SET_PROPERTY', payload: { type: 'deleteId', value: Number(data.event.id) } })
   }
 
   const handleDelete = () => {
-    setAllEvents(allEvents.filter(event => event.id !== deleteId))
-    setShowDeleteModal(false)
-    setDeleteId(null)
+    dispatch({ type: 'REMOVE_EVENT', payload: state.deleteId })
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })
+    dispatch({ type: 'RESET_PROPERTY', payload: 'deleteId' })
   }
 
   const handleCloseModal = () => {
-    setNewEvent({
-      id: 0,
-      title: '',
-      start: '',
-      allDay: false
-    })
-    setShowModal(false)
-    setShowDeleteModal(false)
-    setDeleteId(null)
+    dispatch({ type: 'SET_NEW_EVENT', payload: initialState.newEvent })
+    dispatch({ type: 'RESET_PROPERTY', payload: 'deleteId' })
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setNewEvent({
-      ...newEvent,
-      title: e.target.value
+    dispatch({
+      type: 'SET_NEW_EVENT', payload: {
+        title: e.target.value
+      }
     })
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setAllEvents([...allEvents, newEvent])
-    setShowModal(false)
-    setNewEvent({
-      title: '',
-      start: '',
-      allDay: false,
-      id: 0
-    })
+    dispatch({ type: 'ADD_EVENT', payload: state.newEvent })
+    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })
+    dispatch({ type: 'RESET_PROPERTY', payload: 'newEvent' })
   }
 
   return (
     <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
       <div className="grid grid-cols-10">
         <Calendar
-          allEvents={allEvents}
+          allEvents={state.allEvents}
           handleDateClick={handleDateClick}
           addEvent={addEvent}
           handleDeleteModal={handleDeleteModal}
@@ -139,10 +201,10 @@ export default function Home() {
       </div>
 
       <Modal
-        isOpen={showDeleteModal}
-        onClose={setShowDeleteModal}>
+        isOpen={state.modals.showDeleteModal}
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })}>
         <DialogPanel className="relative transform overflow-hidden rounded-lg
-                   bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+                bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
         >
           <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
             <div className="sm:flex sm:items-start">
@@ -178,8 +240,8 @@ export default function Home() {
       </Modal>
 
       <Modal
-        isOpen={showModal}
-        onClose={setShowModal}>
+        isOpen={state.modals.showModal}
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })}>
         <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
           <div>
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -196,13 +258,13 @@ export default function Home() {
                             focus:ring-2 
                             focus:ring-inset focus:ring-violet-600 
                             sm:text-sm sm:leading-6"
-                    value={newEvent.title} onChange={(e) => handleChange(e)} placeholder="Title" />
+                    value={state.newEvent.title ?? ""} onChange={(e) => handleChange(e)} placeholder="Title" />
                 </div>
                 <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                   <button
                     type="submit"
                     className="inline-flex w-full justify-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:col-start-2 disabled:opacity-25"
-                    disabled={newEvent.title === ''}
+                    disabled={state.newEvent.title === ''}
                   >
                     Create
                   </button>

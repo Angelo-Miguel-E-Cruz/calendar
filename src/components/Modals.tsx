@@ -3,7 +3,7 @@ import { Fragment, ReactNode } from "react";
 
 interface ModalProps {
   isOpen: boolean,
-  onClose: (value: boolean) => void,
+  onClose: () => void,
   children: ReactNode
 }
 
