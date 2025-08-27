@@ -16,28 +16,33 @@ interface CalendarProps {
 
 export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, addEvent }: CalendarProps) {
   return (
-    <div className="col-span-8">
-      <FullCalendar
-        plugins={[
-          dayGridPlugin,
-          interactionPlugin,
-          timeGridPlugin
-        ]}
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'resourceTimelineWeek, dayGridMonth, timeGridWeek'
-        }}
-        events={allEvents as EventSourceInput}
-        nowIndicator={true}
-        editable={true}
-        droppable={true}
-        selectable={true}
-        selectMirror={true}
-        dateClick={handleDateClick}
-        drop={(data) => addEvent(data)}
-        eventClick={(data) => handleDeleteModal(data)}
-      />
-    </div>
+    <FullCalendar
+      plugins={[
+        dayGridPlugin,
+        interactionPlugin,
+        timeGridPlugin
+      ]}
+      headerToolbar={{
+        start: 'dayGridMonth,timeGridWeek,timeGridDay',
+        center: 'title',
+        end: 'today prevYear,prev,next,nextYear'
+      }}
+      buttonText={{
+        today: 'Today',
+        month: 'Month',
+        week: 'Week',
+        day: 'Day'
+      }}
+      allDaySlot={false}
+      events={allEvents as EventSourceInput}
+      nowIndicator={true}
+      editable={true}
+      droppable={true}
+      selectable={true}
+      selectMirror={true}
+      dateClick={handleDateClick}
+      drop={(data) => addEvent(data)}
+      eventClick={(data) => handleDeleteModal(data)}
+    />
   )
 }

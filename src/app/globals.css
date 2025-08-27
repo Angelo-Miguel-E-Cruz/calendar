@@ -23,11 +23,15 @@ input {
 }
 
 .fc-view {
-  @apply w-full h-full lg:h-3/4 xl:h-2/3 bg-white
+  @apply w-full h-full bg-white
 }
 
 .fc-h-event {
   @apply bg-violet-500 border border-violet-600
+}
+
+.fc-view-harness-active {
+  height: 500px !important;
 }
 
 .fc .fc-daygrid-day.fc-day-today {

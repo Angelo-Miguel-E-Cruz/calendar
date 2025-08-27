@@ -1,12 +1,11 @@
 "use client"
 
-import { Draggable, DropArg } from "@fullcalendar/interaction"
-import { useEffect, useReducer, useState } from "react";
+import { DropArg } from "@fullcalendar/interaction"
+import { useReducer } from "react";
 import { generateID, initialState } from "@/utils/exports";
 import Calendar from "@/components/calendar";
 import AddEvent from "@/components/Modals/addEventModal";
 import DeleteEvent from "@/components/Modals/deleteEventModal";
-import { Event } from "@/utils/exports";
 import Reducer from "@/utils/reducer";
 
 export default function Home() {
@@ -38,30 +37,6 @@ export default function Home() {
   }
 
   const { state, dispatch, addEvent, handleDelete } = useCalendarEvents()
-
-  // sample data
-  const [events, setEvents] = useState<Event[]>([
-    { title: 'event 1', id: 1, start: "today", allDay: true },
-    { title: 'event 2', id: 2, start: "today", allDay: false },
-    { title: 'event 3', id: 3, start: "tomorrow", allDay: true },
-    { title: 'event 4', id: 4, start: "tomorrow", allDay: false },
-  ])
-
-  useEffect(() => {
-    let draggableElement = document.getElementById('draggable-el')
-
-    if (draggableElement) {
-      new Draggable(draggableElement, {
-        itemSelector: ".fc-event",
-        eventData: function (eventEl) {
-          let title = eventEl.getAttribute("title")
-          let id = eventEl.getAttribute("data-id")
-          let start = eventEl.getAttribute("data-start")
-          return { title, id, start }
-        }
-      })
-    }
-  }, [])
 
   // ui functions
 
@@ -104,28 +79,14 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-      <div className="grid grid-cols-10">
+    <main className="flex p-4 row-start-2 items-center sm:items-start">
+      <div className="w-full">
         <Calendar
           allEvents={state.allEvents}
           handleDateClick={handleDateClick}
           handleDeleteModal={handleDeleteModal}
           addEvent={addEvent}
         />
-
-        <div id="draggable-el" className="ml-8 w-full border-2 p-2 rounded-md mt-16 lg:h-1/2 bg-violet-50">
-          <h1 className="font-bold text-lg text-center">Drag Event</h1>
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className="fc-event border-2 p-1 m-2 w-full rounded-md ml-auto text-center bg-white cursor-pointer"
-              title={event.title}
-              data-id={event.id}
-              data-start={event.start}>
-              {event.title}
-            </div>
-          ))}
-        </div>
       </div>
 
       <DeleteEvent
