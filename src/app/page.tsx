@@ -2,92 +2,12 @@
 
 import { Draggable, DropArg } from "@fullcalendar/interaction"
 import { useEffect, useReducer, useState } from "react";
-import { generateID } from "@/utils/exports";
+import { generateID, initialState } from "@/utils/exports";
 import Calendar from "@/components/calendar";
 import AddEvent from "@/components/Modals/addEventModal";
 import DeleteEvent from "@/components/Modals/deleteEventModal";
 import { Event } from "@/utils/exports";
-
-interface AppState {
-  allEvents: Event[],
-  newEvent: Event,
-  deleteId: number | null,
-  modals: {
-    showModal: boolean,
-    showDeleteModal: boolean
-  },
-}
-
-const initialState: AppState = {
-  allEvents: [],
-  newEvent: {
-    id: 0,
-    title: '',
-    start: '',
-    allDay: false
-  },
-  deleteId: null,
-  modals: {
-    showModal: false,
-    showDeleteModal: false
-  }
-}
-
-type ActionType =
-  | { type: 'ADD_EVENT', payload: Event }
-  | { type: 'REMOVE_EVENT', payload: number | null }
-
-  | { type: 'TOGGLE_MODAL', payload: { modal: keyof AppState['modals'], isOpen: boolean } }
-
-  | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: number | Event } }
-
-  | { type: 'SET_NEW_EVENT', payload: Partial<Event> }
-
-  | { type: 'RESET_PROPERTY', payload: keyof AppState }
-function Reducer(state: AppState, action: ActionType) {
-  const { type } = action
-
-  switch (type) {
-    case 'ADD_EVENT':
-      return {
-        ...state,
-        allEvents: [...state.allEvents, action.payload]
-      }
-    case 'REMOVE_EVENT':
-      return {
-        ...state,
-        allEvents: state.allEvents.filter(events => events.id !== action.payload)
-      }
-    case 'TOGGLE_MODAL':
-      return {
-        ...state,
-        modals: {
-          ...state.modals,
-          [action.payload.modal]: action.payload.isOpen
-        }
-      }
-    case 'SET_PROPERTY':
-      return {
-        ...state,
-        [action.payload.type]: action.payload.value
-      }
-    case 'RESET_PROPERTY':
-      return {
-        ...state,
-        [action.payload]: initialState
-      }
-    case 'SET_NEW_EVENT':
-      return {
-        ...state,
-        newEvent: {
-          ...state.newEvent,
-          ...action.payload
-        }
-      }
-    default:
-      return state
-  }
-}
+import Reducer from "@/utils/reducer";
 
 export default function Home() {
 
