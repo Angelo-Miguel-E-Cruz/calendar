@@ -5,11 +5,11 @@ import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 interface deleteEventProps {
   isOpen: boolean,
   onClose: () => void,
-  handleSubmit: () => void,
-  onCancel: () => void
+  onCancel: () => void,
+  handleDelete: () => void
 }
 
-export default function DeleteEvent({ isOpen, onClose, handleSubmit, onCancel }: deleteEventProps) {
+export default function DeleteEvent({ isOpen, onClose, onCancel, handleDelete }: deleteEventProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -37,7 +37,7 @@ export default function DeleteEvent({ isOpen, onClose, handleSubmit, onCancel }:
         </div>
         <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
           <button type="button" className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm 
-                      font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto" onClick={handleSubmit}>
+                      font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto" onClick={handleDelete}>
             Delete
           </button>
           <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 

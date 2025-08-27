@@ -11,6 +11,34 @@ import Reducer from "@/utils/reducer";
 
 export default function Home() {
 
+  // custom hook for business logic
+  const useCalendarEvents = () => {
+
+    const [state, dispatch] = useReducer(Reducer, initialState)
+
+    const addEvent = (data: DropArg) => {
+      const event = {
+        ...state.newEvent,
+        id: generateID(),
+        title: data.draggedEl.innerText,
+        start: data.date.toISOString(),
+        allDay: data.allDay
+      }
+      dispatch({ type: 'ADD_EVENT', payload: event })
+    }
+
+
+    const handleDelete = () => {
+      dispatch({ type: 'REMOVE_EVENT', payload: state.deleteId })
+      dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })
+      dispatch({ type: 'RESET_PROPERTY', payload: 'deleteId' })
+    }
+
+    return { state, dispatch, addEvent, handleDelete }
+  }
+
+  const { state, dispatch, addEvent, handleDelete } = useCalendarEvents()
+
   // sample data
   const [events, setEvents] = useState<Event[]>([
     { title: 'event 1', id: 1, start: "today", allDay: true },
@@ -18,8 +46,6 @@ export default function Home() {
     { title: 'event 3', id: 3, start: "tomorrow", allDay: true },
     { title: 'event 4', id: 4, start: "tomorrow", allDay: false },
   ])
-
-  const [state, dispatch] = useReducer(Reducer, initialState)
 
   useEffect(() => {
     let draggableElement = document.getElementById('draggable-el')
@@ -37,7 +63,7 @@ export default function Home() {
     }
   }, [])
 
-  // functions
+  // ui functions
 
   const handleDateClick = (arg: { date: Date, allDay: boolean }) => {
     dispatch({
@@ -50,26 +76,9 @@ export default function Home() {
     dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: true } })
   }
 
-  const addEvent = (data: DropArg) => {
-    const event = {
-      ...state.newEvent,
-      id: generateID(),
-      title: data.draggedEl.innerText,
-      start: data.date.toISOString(),
-      allDay: data.allDay
-    }
-    dispatch({ type: 'ADD_EVENT', payload: event })
-  }
-
   const handleDeleteModal = (data: { event: { id: string } }) => {
     dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: true } })
     dispatch({ type: 'SET_PROPERTY', payload: { type: 'deleteId', value: Number(data.event.id) } })
-  }
-
-  const handleDelete = () => {
-    dispatch({ type: 'REMOVE_EVENT', payload: state.deleteId })
-    dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })
-    dispatch({ type: 'RESET_PROPERTY', payload: 'deleteId' })
   }
 
   const handleCloseModal = () => {
@@ -100,8 +109,8 @@ export default function Home() {
         <Calendar
           allEvents={state.allEvents}
           handleDateClick={handleDateClick}
-          addEvent={addEvent}
           handleDeleteModal={handleDeleteModal}
+          addEvent={addEvent}
         />
 
         <div id="draggable-el" className="ml-8 w-full border-2 p-2 rounded-md mt-16 lg:h-1/2 bg-violet-50">
@@ -122,8 +131,8 @@ export default function Home() {
       <DeleteEvent
         isOpen={state.modals.showDeleteModal}
         onClose={() => dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })}
-        handleSubmit={handleDelete}
-        onCancel={handleCloseModal} />
+        onCancel={handleCloseModal}
+        handleDelete={handleDelete} />
 
       <AddEvent
         isOpen={state.modals.showModal}

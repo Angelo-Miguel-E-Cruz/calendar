@@ -37,11 +37,7 @@ export const initialState: AppState = {
 export type ActionType =
   | { type: 'ADD_EVENT', payload: Event }
   | { type: 'REMOVE_EVENT', payload: number | null }
-
   | { type: 'TOGGLE_MODAL', payload: { modal: keyof AppState['modals'], isOpen: boolean } }
-
   | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: number | Event } }
-
   | { type: 'SET_NEW_EVENT', payload: Partial<Event> }
-
   | { type: 'RESET_PROPERTY', payload: keyof AppState }

@@ -30,7 +30,7 @@ export default function Reducer(state: AppState, action: ActionType) {
     case 'RESET_PROPERTY':
       return {
         ...state,
-        [action.payload]: initialState
+        [action.payload]: initialState[action.payload]
       }
     case 'SET_NEW_EVENT':
       return {

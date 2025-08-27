@@ -1,5 +1,5 @@
 
-import interactionPlugin, { Draggable, DropArg } from "@fullcalendar/interaction"
+import interactionPlugin, { DropArg } from "@fullcalendar/interaction"
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -9,11 +9,12 @@ import { Event } from "@/utils/exports";
 interface CalendarProps {
   allEvents: Event[],
   handleDateClick: (arg: { date: Date, allDay: boolean }) => void,
-  addEvent: (data: DropArg) => void,
-  handleDeleteModal: (data: { event: { id: string } }) => void
+  handleDeleteModal: (data: { event: { id: string } }) => void,
+  addEvent: (data: DropArg) => void
 }
 
-export default function Calendar({ allEvents, handleDateClick, addEvent, handleDeleteModal }: CalendarProps) {
+
+export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, addEvent }: CalendarProps) {
   return (
     <div className="col-span-8">
       <FullCalendar
