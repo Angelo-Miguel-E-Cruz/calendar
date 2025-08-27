@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from "next/font/google";
+import Navbar from "@/components/navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,17 +25,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <ClerkProvider>
+      <header>
+        <Navbar />
+      </header>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
 
-        <nav className="flex justify-between mb-12 border-b border-b-violet-100 p-4">
-          <h1 className="font-bold text-2xl text-gray-700">Calendar</h1>
-        </nav>
-
-        {children}
-      </body>
-    </html>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
