@@ -17,9 +17,14 @@
     "@fullcalendar/timegrid": "^6.1.19",
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.56.0",
     "next": "15.5.0",
+    "ngrok": "^5.0.0-beta.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "supabase": "^2.39.2",
+    "svix": "^1.75.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

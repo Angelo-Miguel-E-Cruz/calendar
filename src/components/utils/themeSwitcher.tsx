@@ -1,7 +1,7 @@
 "use client"
 
 import { MoonIcon, SunIcon } from '@heroicons/react/20/solid';
-import { useTheme } from '@/utils/useTheme';
+import { useTheme } from '@/lib/hooks/useTheme';
 
 // Toggle switch version
 export const ToggleThemeSwitcher = () => {
@@ -28,7 +28,7 @@ export const ToggleThemeSwitcher = () => {
     >
       <span
         style={knobStyle}
-        className="inline-block w-6 h-6 rounded-full items-center justify-center"
+        className="flex w-6 h-6 rounded-full items-center justify-center"
       >
         {theme === 'light' ? (
           <SunIcon className="w-4 h-4 text-yellow-600" />

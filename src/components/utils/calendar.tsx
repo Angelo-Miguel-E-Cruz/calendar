@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { EventSourceInput } from '@fullcalendar/core/index.js'
-import { Event } from "@/utils/exports";
+import { Event } from "@/lib/exports";
 
 interface CalendarProps {
   allEvents: Event[],

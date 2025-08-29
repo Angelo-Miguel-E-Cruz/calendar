@@ -1,4 +1,4 @@
-import Modal from "@/components/Modals/modals";
+import Modal from "@/components/modals/modals";
 import { DialogPanel, DialogTitle } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/20/solid";
 

@@ -2,8 +2,8 @@ import {
   SignedIn,
   SignedOut
 } from '@clerk/nextjs'
-import Main from '@/components/Pages/main';
-import LandingPage from '@/components/Pages/landing';
+import Main from '@/components/pages/main';
+import LandingPage from '@/components/pages/landing';
 
 export default function Home() {
   return (
