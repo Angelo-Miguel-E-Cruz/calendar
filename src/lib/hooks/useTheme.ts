@@ -39,6 +39,7 @@ export const useTheme = () => {
       /* FullCalendar dark mode styles */
       [data-theme="dark"] .fc {
         color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
       
       [data-theme="dark"] .fc-theme-standard .fc-scrollgrid {
@@ -55,6 +56,7 @@ export const useTheme = () => {
         background-color: #4f46e5;
         border-color: #4f46e5;
       }
+
       
       [data-theme="dark"] .fc-daygrid-day-number {
         color: var(--text-primary);

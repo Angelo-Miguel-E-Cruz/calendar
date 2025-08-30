@@ -35,7 +35,7 @@ input {
 }
 
 .fc .fc-daygrid-day.fc-day-today {
-  @apply bg-violet-100
+  @apply bg-violet-400
 }
 
 .fc .fc-button {
