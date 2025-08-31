@@ -6,7 +6,7 @@ import { generateID, initialState } from "@/lib/exports";
 import Calendar from "@/components/utils/calendar";
 import AddEvent from "@/components/modals/addEventModal";
 import DeleteEvent from "@/components/modals/deleteEventModal";
-import Reducer from "@/lib/reducer";
+import Reducer from "@/lib/reducers/reducer";
 
 export default function Main() {
 

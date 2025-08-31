@@ -1,23 +1,15 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer } from 'react'
 import { Calendar, Error } from '@/lib/exports'
 import AddCalendar from '../modals/addCalendarModal'
 import Loading from '../utils/loading'
-import { PencilSquareIcon, PlusIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon, PlusIcon, XMarkIcon } from "@heroicons/react/20/solid"
+import { initialListState } from '@/lib/exports/states/states'
+import ListReducer from '@/lib/reducers/listReducer'
 
 export default function Default() {
 
-  // use useReducer ?
-  const [calendars, setCalendars] = useState<Calendar[]>([])
-  const [loading, setLoading] = useState(false)
-  const [loadingMessage, setLoadingMessage] = useState("Loading") // combine w loading state in useReducer
-  const [error, setError] = useState<Error>({
-    isError: false,
-    errorMessage: ""
-  })
-  const [addCalendar, setAddCalendar] = useState(false)
-  const [newCalendarName, setNewCalendarName] = useState("")
-  const [isEditMode, setIsEditMode] = useState(false)
+  const [state, dispatch] = useReducer(ListReducer, initialListState)
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -48,70 +40,58 @@ export default function Default() {
       }
       return newCalendar
     })
-    setCalendars(newCalendars)
+    dispatch({ type: 'SET_CALENDAR', payload: newCalendars })
   }
 
   const getCalendars = async () => {
-    setLoadingMessage("Fetching Calendars")
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Calendars" } })
     try {
       const response = await fetch('/api/calendars')
       const data: { calendars: Calendar[] } = await response.json()
       loadCalendars(data.calendars)
     } catch (error) {
-      setError({
-        isError: true,
-        errorMessage: error as string
-      })
+      dispatch({ type: 'SET_ERROR', payload: { errorValue: true, message: error as string } })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
 
   const createCalendar = async () => {
-    setLoadingMessage("Creating Calendar")
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Creating Calendar" } })
     try {
       const response = await fetch('/api/calendars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: newCalendarName,
+          name: state.ui.newCalendarName,
           //description: 'Created from API test page' -> handle this
         })
       })
       const data = await response.json()
     } catch (error) {
-      setError({
-        isError: true,
-        errorMessage: error as string
-      })
+      dispatch({ type: 'SET_ERROR', payload: { errorValue: true, message: error as string } })
     } finally {
       getCalendars()
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
 
   const removeCalendar = async (id: string) => {
-    setLoadingMessage("Removing Calendar")
-    setLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Removing Calendar" } })
     try {
       const response = await fetch(`/api/calendars/${id}`, {
         method: 'DELETE'
       })
       getCalendars()
     } catch (error) {
-      setError({
-        isError: true,
-        errorMessage: error as string
-      })
+      dispatch({ type: 'SET_ERROR', payload: { errorValue: true, message: error as string } })
     } finally {
-      setLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setNewCalendarName(e.target.value)
+    dispatch({ type: 'SET_UI', payload: { ui: 'newCalendarName', value: e.target.value } })
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -121,16 +101,16 @@ export default function Default() {
   }
 
   const handleCloseModal = () => {
-    setAddCalendar(false)
-    setNewCalendarName("")
+    dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: false } })
+    dispatch({ type: 'SET_UI', payload: { ui: 'newCalendarName', value: "" } })
   }
 
   useEffect(() => {
     getCalendars()
   }, [])
 
-  if (error.isError)
-    console.error(error.errorMessage)
+  if (state.error.isError)
+    console.error(state.error.errorMessage)
 
 
   return (
@@ -141,23 +121,22 @@ export default function Default() {
       <h1 className="text-center text-4xl font-bold mb-8"> Calendars</h1>
 
       <div className="flex justify-end-safe mb-8 gap-2">
-        <button className={`p-2 rounded  text-white ${isEditMode ? "bg-red-500 hover:bg-red-600" : "hover:bg-gray-300 dark:hover:bg-gray-700"}`}
-          onClick={() => setIsEditMode(!isEditMode)}>
-          {!isEditMode ?
+        <button className={`p-2 rounded  text-white ${state.ui.isEditMode ? "bg-red-500 hover:bg-red-600" : "hover:bg-gray-300 dark:hover:bg-gray-700"}`}
+          onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'isEditMode', value: !state.ui.isEditMode } })}>
+          {!state.ui.isEditMode ?
             <PencilSquareIcon className="h-8 w-8 text-purple-600" />
             : <XMarkIcon className='h-8 w-8' />}
         </button>
         <button className="btn-add-calendar"
-          onClick={() => setAddCalendar(true)}>
+          onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: true } })}>
           <span className="text-lg"><PlusIcon className="h-6 w-6" /></span>
           Create
         </button>
-
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 justify-items-center-safe gap-4 mx-auto">
         {
-          calendars.map((calendar) => {
+          state.calendars.map((calendar) => {
             return (
               <div className="calendar-card" key={calendar.id}>
                 <div className='p-4 flex-1'>
@@ -170,7 +149,7 @@ export default function Default() {
                   </div>
 
                 </div>
-                {isEditMode && (
+                {state.ui.isEditMode && (
                   <button
                     className="bg-red-500 text-white w-8 h-full flex items-center justify-center rounded-r text-4xl"
                     onClick={() => removeCalendar(calendar.id)}>
@@ -183,13 +162,12 @@ export default function Default() {
         }
       </div>
 
-
-      {loading && (<Loading loadingMessage={loadingMessage} />)}
+      {state.loading.isLoading && (<Loading loadingMessage={state.loading.loadingMsg} />)}
 
       <AddCalendar
-        isOpen={addCalendar}
-        onClose={() => setAddCalendar(false)}
-        calendarTitle={newCalendarName}
+        isOpen={state.ui.addCalendar}
+        onClose={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: false } })}
+        calendarTitle={state.ui.newCalendarName}
         handleSubmit={handleSubmit}
         handleChange={handleChange}
         onCancel={handleCloseModal}

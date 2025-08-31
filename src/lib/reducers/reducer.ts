@@ -1,4 +1,4 @@
-import { AppState, ActionType, initialState } from "./exports"
+import { AppState, ActionType, initialState } from "../exports"
 
 export default function Reducer(state: AppState, action: ActionType) {
   const { type } = action

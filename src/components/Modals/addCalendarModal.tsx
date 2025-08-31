@@ -23,7 +23,7 @@ export default function AddCalendar({ isOpen, onClose, calendarTitle, handleSubm
           </div>
           <div className="mt-3 text-center sm:mt-5">
             <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
-              Add Event
+              Add Calendar
             </DialogTitle>
             <form action="submit" onSubmit={handleSubmit}>
               <div className="mt-2">
