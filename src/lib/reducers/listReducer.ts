@@ -1,4 +1,4 @@
-import { CalendarListState, ListActionType, initialListState } from "../exports/states/states"
+import { CalendarListState, ListActionType, initialListState } from "../states/states"
 
 export default function ListReducer(state: CalendarListState, action: ListActionType) {
   const { type } = action

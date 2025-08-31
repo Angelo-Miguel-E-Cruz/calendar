@@ -4,7 +4,7 @@ import { Calendar, Error } from '@/lib/exports'
 import AddCalendar from '../modals/addCalendarModal'
 import Loading from '../utils/loading'
 import { PencilSquareIcon, PlusIcon, XMarkIcon } from "@heroicons/react/20/solid"
-import { initialListState } from '@/lib/exports/states/states'
+import { initialListState } from '@/lib/states/states'
 import ListReducer from '@/lib/reducers/listReducer'
 
 export default function Default() {

@@ -2,11 +2,12 @@
 
 import { DropArg } from "@fullcalendar/interaction"
 import { useReducer } from "react";
-import { generateID, initialState } from "@/lib/exports";
+import { generateID } from "@/lib/exports";
 import Calendar from "@/components/utils/calendar";
 import AddEvent from "@/components/modals/addEventModal";
 import DeleteEvent from "@/components/modals/deleteEventModal";
 import Reducer from "@/lib/reducers/reducer";
+import { initialState } from "@/lib/states/states";
 
 export default function Main() {
 
