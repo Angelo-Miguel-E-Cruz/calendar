@@ -59,6 +59,28 @@ export default function ApiTestPage() {
     }
   }
 
+  const testRemoveCalendar = async () => {
+    const calendarId = window.lastCalendarId
+    if (!calendarId) {
+      addResult('DELETE /api/calendars/[id]', { error: 'No calendar ID. Create a calendar first.' }, false)
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/calendars/${calendarId}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      addResult(`DELETE /api/calendars/[id]`, { status: response.status, data }, response.ok)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      addResult('DELETE /api/calendars/[id]', { error: errorMessage }, false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const testGetEvents = async () => {
     const calendarId = window.lastCalendarId
     if (!calendarId) {
@@ -183,6 +205,14 @@ export default function ApiTestPage() {
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
         >
           Test Create Calendar
+        </button>
+
+        <button
+          onClick={testRemoveCalendar}
+          disabled={loading}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+        >
+          Test Remove Calendar
         </button>
 
         <button

@@ -42,6 +42,11 @@ export type ActionType =
   | { type: 'SET_NEW_EVENT', payload: Partial<Event> }
   | { type: 'RESET_PROPERTY', payload: keyof AppState }
 
+export interface Error {
+  isError: boolean
+  errorMessage: string
+}
+
 export interface Calendar {
   id: string
   name: string

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createServerClient } from '@/lib/supabase/supabase-server'
+import { createAdminClient } from '@/lib/supabase/supabase-server'
 import { CalendarWithMembers } from '@/lib/exports'
 
 interface RouteParams {
@@ -9,15 +9,10 @@ interface RouteParams {
   }
 }
 
+const supabase = createAdminClient()
+
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supabase = createServerClient()
-
     const { data, error } = await supabase
       .from('calendars')
       .select(`
@@ -33,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Check if user has access
     const hasAccess = calendar.calendar_members.some(
-      (member) => member.user_id === userId
+      (member) => member.user_id === params.id
     )
 
     if (!hasAccess) {
@@ -41,6 +36,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json({ calendar })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: errorMessage }, { status: 400 })
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { error } = await supabase
+      .from('calendars')
+      .delete()
+      .eq('id', params.id)
+
+    if (error) throw error
+
+    return NextResponse.json({ message: "Deleted succesfully" }, { status: 200 })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json({ error: errorMessage }, { status: 400 })

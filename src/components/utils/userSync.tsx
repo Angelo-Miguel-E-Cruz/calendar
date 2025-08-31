@@ -20,16 +20,8 @@ export function UserSync() {
       return
     }
 
-    console.log('User found:', {
-      id: user.id,
-      email: user.primaryEmailAddress?.emailAddress,
-      firstName: user.firstName,
-      lastName: user.lastName
-    })
-
     const syncUser = async () => {
       try {
-        console.log('Checking if user exists in Supabase...')
 
         // Check if user exists in Supabase
         const { data: existingUser, error: checkError } = await supabase
@@ -38,15 +30,12 @@ export function UserSync() {
           .eq('clerk_id', user.id)
           .single()
 
-        console.log('Check result:', { existingUser, checkError })
-
         if (checkError && checkError.code !== 'PGRST116') {
           console.error('Error checking for existing user:', checkError)
           return
         }
 
         if (!existingUser) {
-          console.log('User not found, creating new user...')
 
           const userData = {
             clerk_id: user.id,
@@ -54,8 +43,6 @@ export function UserSync() {
             name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || null,
             avatar_url: user.imageUrl || null,
           }
-
-          console.log('Inserting user data:', userData)
 
           // Create user in Supabase
           const { error: insertError, data: insertData } = await supabase
@@ -65,11 +52,7 @@ export function UserSync() {
 
           if (insertError) {
             console.error('Error creating user:', insertError)
-          } else {
-            console.log('User synced to Supabase!', insertData)
           }
-        } else {
-          console.log('User already exists in Supabase')
         }
       } catch (error) {
         console.error('Error syncing user:', error)
