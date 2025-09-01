@@ -5,16 +5,6 @@ export default function Reducer(state: AppState, action: ActionType) {
   const { type } = action
 
   switch (type) {
-    case 'ADD_EVENT':
-      return {
-        ...state,
-        allEvents: [...state.allEvents, action.payload]
-      }
-    case 'REMOVE_EVENT':
-      return {
-        ...state,
-        allEvents: state.allEvents.filter(events => events.id !== action.payload)
-      }
     case 'TOGGLE_MODAL':
       return {
         ...state,
@@ -40,6 +30,21 @@ export default function Reducer(state: AppState, action: ActionType) {
           ...state.newEvent,
           ...action.payload
         }
+      }
+    case "ADD_DB_EVENT":
+      return {
+        ...state,
+        dbEvents: [...state.dbEvents, action.payload]
+      }
+    case "UPDATE_DB_EVENT":
+      return {
+        ...state,
+        dbEvents: state.dbEvents.map(e => e.id === action.payload.id ? action.payload.event : e)
+      }
+    case "REMOVE_DB_EVENT":
+      return {
+        ...state,
+        dbEvents: state.dbEvents.filter(e => e.id !== action.payload)
       }
     default:
       return state

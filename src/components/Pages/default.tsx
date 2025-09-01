@@ -1,33 +1,17 @@
 'use client'
 import { useEffect, useReducer } from 'react'
-import { Calendar, Error } from '@/lib/exports'
+import { useRouter } from 'next/navigation'
+import { Calendar } from '@/lib/exports'
 import AddCalendar from '../modals/addCalendarModal'
 import Loading from '../utils/loading'
-import { PencilSquareIcon, PlusIcon, XMarkIcon } from "@heroicons/react/20/solid"
+import { PencilSquareIcon, PlusIcon, XMarkIcon, ClockIcon } from "@heroicons/react/20/solid"
 import { initialListState } from '@/lib/states/states'
 import ListReducer from '@/lib/reducers/listReducer'
 
-export default function Default() {
-
+// custom hook for business logic
+const useListFunctions = () => {
   const [state, dispatch] = useReducer(ListReducer, initialListState)
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-
-    hours = hours % 12 || 12;
-
-    return `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`;
-  }
-
-  // use custom hook ?
   const loadCalendars = (data: any) => {
     const newCalendars: Calendar[] = data.map((calendar: Calendar) => {
       const newCalendar: Calendar = {
@@ -68,10 +52,11 @@ export default function Default() {
         })
       })
       const data = await response.json()
+
+      dispatch({ type: 'ADD_CALENDAR', payload: data as Calendar })
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: { errorValue: true, message: error as string } })
     } finally {
-      getCalendars()
       dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
@@ -82,12 +67,42 @@ export default function Default() {
       const response = await fetch(`/api/calendars/${id}`, {
         method: 'DELETE'
       })
-      getCalendars()
+
+      dispatch({ type: 'REMOVE_CALENDAR', payload: id })
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: { errorValue: true, message: error as string } })
     } finally {
       dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
+  }
+  return { state, dispatch, getCalendars, createCalendar, removeCalendar }
+}
+
+const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString)
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = date.toLocaleString('en-US', { month: 'short' })
+  const year = date.getFullYear()
+
+  let hours = date.getHours()
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+
+  hours = hours % 12 || 12
+
+  return `${day} ${month} ${year} ${hours}:${minutes} ${ampm}`
+}
+
+export default function Default() {
+
+  const router = useRouter()
+
+  const { state, dispatch, getCalendars, createCalendar, removeCalendar } = useListFunctions()
+
+  // add prefetching
+  const navToCalendar = (calendarId: string) => {
+    router.push(`/calendar/${calendarId}`)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -111,7 +126,6 @@ export default function Default() {
 
   if (state.error.isError)
     console.error(state.error.errorMessage)
-
 
   return (
     <div className="flex justify-center flex-col p-4">
@@ -138,12 +152,13 @@ export default function Default() {
         {
           state.calendars.map((calendar) => {
             return (
-              <div className="calendar-card" key={calendar.id}>
+              <div className="calendar-card" key={calendar.id} onClick={() => !state.ui.isEditMode && navToCalendar(calendar.id)}>
                 <div className='p-4 flex-1'>
 
-                  <h2 className="text-lg font-bold">{calendar.name}</h2>
+                  <h2 className="text-lg text-left font-bold">{calendar.name}</h2>
 
                   <div className="flex items-center gap-2 mt-2 text-sm text-gray-200">
+                    <span> <ClockIcon className='h-4 w-4' /> </span>
                     Last update:
                     <span className='font-semibold'>{formatDateTime(calendar.updated_at)} </span>
                   </div>

@@ -38,6 +38,16 @@ export default function ListReducer(state: CalendarListState, action: ListAction
         ...state,
         calendars: action.payload
       }
+    case "ADD_CALENDAR":
+      return {
+        ...state,
+        calendars: [...state.calendars, action.payload]
+      }
+    case "REMOVE_CALENDAR":
+      return {
+        ...state,
+        calendars: state.calendars.filter((calendar) => calendar.id !== action.payload)
+      }
     default:
       return state
   }

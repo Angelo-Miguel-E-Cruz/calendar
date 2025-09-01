@@ -4,17 +4,15 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { EventSourceInput } from '@fullcalendar/core/index.js'
-import { Event } from "@/lib/exports";
 
 interface CalendarProps {
-  allEvents: Event[],
+  allEvents: EventSourceInput,
   handleDateClick: (arg: { date: Date, allDay: boolean }) => void,
-  handleDeleteModal: (data: { event: { id: string } }) => void,
-  addEvent: (data: DropArg) => void
+  handleDeleteModal: (data: { event: { id: string } }) => void
 }
 
 
-export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, addEvent }: CalendarProps) {
+export default function Calendar({ allEvents, handleDateClick, handleDeleteModal }: CalendarProps) {
   return (
     <FullCalendar
       plugins={[
@@ -34,14 +32,13 @@ export default function Calendar({ allEvents, handleDateClick, handleDeleteModal
         day: 'Day'
       }}
       allDaySlot={false}
-      events={allEvents as EventSourceInput}
+      events={allEvents}
       nowIndicator={true}
       editable={true}
       droppable={true}
       selectable={true}
       selectMirror={true}
       dateClick={handleDateClick}
-      drop={(data) => addEvent(data)}
       eventClick={(data) => handleDeleteModal(data)}
     />
   )

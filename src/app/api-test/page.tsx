@@ -33,6 +33,20 @@ export default function ApiTestPage() {
     }
   }
 
+  const testGetCalwithId = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/calendars/aea9ba1d-9aec-478e-a120-0441d26d139c`)
+      const data = await response.json()
+      addResult('GET /api//id', { status: response.status, data }, response.ok)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      addResult('GET /api/calendars/id', { error: errorMessage }, false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const testCreateCalendar = async () => {
     setLoading(true)
     try {
@@ -118,9 +132,9 @@ export default function ApiTestPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `Test Event ${Date.now()}`,
-          description: 'Created from API test page',
+          description: '',
           start_time: startTime.toISOString(),
-          end_time: endTime.toISOString()
+          all_day: false
         })
       })
       const data = await response.json()
@@ -197,6 +211,14 @@ export default function ApiTestPage() {
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
         >
           Test GET Calendars
+        </button>
+
+        <button
+          onClick={testGetCalwithId}
+          disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+          Test GET  with ID
         </button>
 
         <button

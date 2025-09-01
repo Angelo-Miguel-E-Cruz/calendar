@@ -1,4 +1,4 @@
-import { Calendar, Error, Event } from "@/lib/exports"
+import { Calendar, CalendarWithMembers, DatabaseEvent, NewEvent, Error } from "@/lib/exports"
 
 // List States
 export interface CalendarListState {
@@ -41,38 +41,50 @@ export type ListActionType =
   | { type: 'SET_UI', payload: { ui: keyof CalendarListState['ui'], value: boolean | string } }
 
   | { type: 'SET_CALENDAR', payload: Calendar[] }
+  | { type: 'ADD_CALENDAR', payload: Calendar }
+  | { type: 'REMOVE_CALENDAR', payload: string }
 
 // Calendar States
 
 export interface AppState {
-  allEvents: Event[],
-  newEvent: Event,
-  deleteId: number | null,
+  newEvent: NewEvent,
+  deleteId: string | null,
   modals: {
     showModal: boolean,
     showDeleteModal: boolean
   },
+  dbEvents: DatabaseEvent[],
+  calendar: CalendarWithMembers | null
 }
 
 export const initialState: AppState = {
-  allEvents: [],
   newEvent: {
-    id: 0,
     title: '',
-    start: '',
+    description: null,
+    start_time: '',
+    end_time: null,
     allDay: false
   },
   deleteId: null,
   modals: {
     showModal: false,
     showDeleteModal: false
-  }
+  },
+  dbEvents: [],
+  calendar: null
 }
 
 export type ActionType =
-  | { type: 'ADD_EVENT', payload: Event }
-  | { type: 'REMOVE_EVENT', payload: number | null }
+
+  // Events
+  | { type: 'ADD_DB_EVENT', payload: DatabaseEvent }
+  | { type: 'UPDATE_DB_EVENT', payload: { id: string, event: DatabaseEvent } }
+  | { type: 'REMOVE_DB_EVENT', payload: string }
+
+  // UI
   | { type: 'TOGGLE_MODAL', payload: { modal: keyof AppState['modals'], isOpen: boolean } }
-  | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: number | Event } }
-  | { type: 'SET_NEW_EVENT', payload: Partial<Event> }
+  | { type: 'SET_NEW_EVENT', payload: Partial<NewEvent> }
+
+  // Util
+  | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: string | DatabaseEvent[] | CalendarWithMembers | null } }
   | { type: 'RESET_PROPERTY', payload: keyof AppState }

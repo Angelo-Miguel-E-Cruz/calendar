@@ -2,16 +2,25 @@ export function generateID(): number {
   return Date.now() + Math.floor(Math.random() * 1000)
 }
 
-export interface Event {
-  id: number
-  title: string
-  start: Date | string
-  allDay: boolean
+export interface DatabaseEvent {
+  id: string // need in fc
+  calendar_id: string
+  title: string // need in fc
+  description?: string
+  start_time: string // need in fc
+  end_time?: string
+  allDay: boolean // need in fc
+  created_by: string
+  created_at: string
+  updated_at: string
 }
 
-export interface Error {
-  isError: boolean
-  errorMessage: string
+export interface NewEvent {
+  title: string
+  description: string | null
+  start_time: string
+  end_time: string | null
+  allDay: boolean
 }
 
 export interface Calendar {
@@ -31,18 +40,6 @@ export interface CalendarMember {
   created_at: string
 }
 
-export interface DatabaseEvent {
-  id: string
-  calendar_id: string
-  title: string
-  description?: string
-  start_time: string
-  end_time: string
-  created_by: string
-  created_at: string
-  updated_at: string
-}
-
 export interface CalendarWithMembers extends Calendar {
   calendar_members: (CalendarMember & {
     users: {
@@ -55,4 +52,9 @@ export interface CalendarWithMembers extends Calendar {
 
 export interface CalendarWithRole extends Calendar {
   calendar_members: { role: string }[]
+}
+
+export interface Error {
+  isError: boolean
+  errorMessage: string
 }

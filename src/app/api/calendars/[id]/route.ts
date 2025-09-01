@@ -13,11 +13,32 @@ const supabase = createAdminClient()
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userQuery = await supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_id', userId)
+      .maybeSingle()
+
+    if (userQuery.error) {
+      const err = userQuery.error
+      return NextResponse.json({ err }, { status: userQuery.status })
+    }
+    if (!userQuery.data) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    const internalUserId = userQuery.data.id
+
     const { data, error } = await supabase
       .from('calendars')
       .select(`
         *,
-        calendar_members(user_id, role, users(email, first_name, last_name))
+        calendar_members(user_id, role, users(name))
       `)
       .eq('id', params.id)
       .single()
@@ -28,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Check if user has access
     const hasAccess = calendar.calendar_members.some(
-      (member) => member.user_id === params.id
+      (member) => member.user_id === internalUserId
     )
 
     if (!hasAccess) {
@@ -37,8 +58,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ calendar })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: errorMessage }, { status: 400 })
+    return NextResponse.json({ error: error }, { status: 400 })
   }
 }
 
