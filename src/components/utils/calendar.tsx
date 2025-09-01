@@ -1,18 +1,35 @@
 
-import interactionPlugin, { DropArg } from "@fullcalendar/interaction"
+import interactionPlugin from "@fullcalendar/interaction"
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { EventSourceInput } from '@fullcalendar/core/index.js'
+import { DatabaseEvent } from "@/lib/exports";
 
 interface CalendarProps {
-  allEvents: EventSourceInput,
+  allEvents: DatabaseEvent[],
   handleDateClick: (arg: { date: Date, allDay: boolean }) => void,
   handleDeleteModal: (data: { event: { id: string } }) => void
 }
 
 
 export default function Calendar({ allEvents, handleDateClick, handleDeleteModal }: CalendarProps) {
+  console.log("calendar: ", allEvents)
+
+  const validEvents = Array.isArray(allEvents) ? allEvents.filter(event =>
+    event.title && event.start_time
+  ) : []
+
+  console.log("valid events:", validEvents)
+
+  const transformedEvents = allEvents.map(event => ({
+    id: event.id,
+    title: event.title,
+    start: event.start_time, // Map start_time to start
+    end: event.end_time,     // Map end_time to end (can be null)
+    allDay: event.allDay
+  }))
+
   return (
     <FullCalendar
       plugins={[
@@ -32,7 +49,7 @@ export default function Calendar({ allEvents, handleDateClick, handleDeleteModal
         day: 'Day'
       }}
       allDaySlot={false}
-      events={allEvents}
+      events={transformedEvents as EventSourceInput}
       nowIndicator={true}
       editable={true}
       droppable={true}

@@ -8,6 +8,7 @@ import AddEvent from "@/components/modals/addEventModal";
 import DeleteEvent from "@/components/modals/deleteEventModal";
 import Reducer from "@/lib/reducers/reducer";
 import { initialState } from "@/lib/states/states";
+import { DropArg } from '@fullcalendar/interaction/index.js'
 
 const supabase = createServerClient()
 
@@ -149,12 +150,16 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
     return cleanup
   }, [id])
 
+  useEffect(() => {
+    console.log(state.dbEvents)
+  }, [state.dbEvents])
+
   return (
     <div className="p-6">
       <h1 className='text-2xl'>{state.calendar?.name}</h1>
 
       <Calendar
-        allEvents={state.dbEvents as EventSourceInput}
+        allEvents={state.dbEvents}
         handleDateClick={handleDateClick}
         handleDeleteModal={handleDeleteModal}
       />
