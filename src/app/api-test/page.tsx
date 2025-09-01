@@ -149,6 +149,44 @@ export default function ApiTestPage() {
       setLoading(false)
     }
   }
+
+
+  const testCreateEventwEnd = async () => {
+    const calendarId = window.lastCalendarId
+    if (!calendarId) {
+      addResult('POST /api/calendars/[id]/events', { error: 'No calendar ID. Create a calendar first.' }, false)
+      return
+    }
+
+    setLoading(true)
+    try {
+      const startTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // Tomorrow
+      const endTime = new Date(Date.now() + 25 * 60 * 60 * 1000)   // Tomorrow + 1hr
+
+      const response = await fetch(`/api/calendars/${calendarId}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `Test Event ${Date.now()}`,
+          description: '',
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          all_day: false
+        })
+      })
+      const data = await response.json()
+      if (response.ok && data.event?.id) {
+        window.lastEventId = data.event.id
+      }
+      addResult(`POST /api/calendars/${calendarId}/events`, { status: response.status, data }, response.ok)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      addResult('POST /api/calendars/[id]/events', { error: errorMessage }, false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const testRemoveEvent = async () => {
     const calendarId = window.lastCalendarId
     const eventId = window.lastEventId
@@ -156,8 +194,6 @@ export default function ApiTestPage() {
       addResult('DELETE /api/calendars/[id]/events/[id]', { error: 'No calendar ID. Create a calendar first.' }, false)
       return
     }
-
-    console.log(calendarId, eventId)
 
     setLoading(true)
     try {
@@ -276,6 +312,14 @@ export default function ApiTestPage() {
           onClick={testCreateEvent}
           disabled={loading}
           className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50"
+        >
+          Test Create Event
+        </button>
+
+        <button
+          onClick={testCreateEventwEnd}
+          disabled={loading}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
         >
           Test Create Event
         </button>

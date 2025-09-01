@@ -3,17 +3,18 @@ import interactionPlugin from "@fullcalendar/interaction"
 import dayGridPlugin from '@fullcalendar/daygrid'
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from '@fullcalendar/timegrid'
-import { EventSourceInput } from '@fullcalendar/core/index.js'
+import { EventApi, EventSourceInput } from '@fullcalendar/core/index.js'
 import { DatabaseEvent } from "@/lib/exports";
 
 interface CalendarProps {
   allEvents: DatabaseEvent[],
   handleDateClick: (arg: { date: Date, allDay: boolean }) => void,
-  handleDeleteModal: (data: { event: { id: string } }) => void
+  handleDeleteModal: (data: { event: { id: string } }) => void,
+  handleResize: (data: { event: EventApi }) => void
 }
 
 
-export default function Calendar({ allEvents, handleDateClick, handleDeleteModal }: CalendarProps) {
+export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, handleResize }: CalendarProps) {
 
   const transformedEvents = allEvents.map(event => ({
     id: event.id,
@@ -45,6 +46,7 @@ export default function Calendar({ allEvents, handleDateClick, handleDeleteModal
       events={transformedEvents as EventSourceInput}
       nowIndicator={true}
       editable={true}
+      eventResize={(event) => handleResize(event)}
       selectable={true}
       selectMirror={true}
       dateClick={handleDateClick}

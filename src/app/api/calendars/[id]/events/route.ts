@@ -127,7 +127,9 @@ export async function POST(
       allDay: boolean
     } = await request.json()
 
-    const { title, description, start_time, end_time, allDay } = body
+    const { title, description, start_time, end_time: rawEnd, allDay } = body
+
+    const end_time = rawEnd || start_time
 
     // Verify user has access to this calendar
     const props: VerifyParams = {

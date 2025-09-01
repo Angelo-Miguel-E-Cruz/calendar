@@ -70,7 +70,6 @@ export async function DELETE(
   { params }: RouteParams
 ): Promise<NextResponse> {
   try {
-    console.log('DELETE route called with params:', params)
 
     const { userId } = await auth()
     if (!userId) {
@@ -99,6 +98,55 @@ export async function DELETE(
     const { error, count } = await supabase
       .from('events')
       .delete({ count: 'exact' })
+      .eq('id', params.eventId)
+
+    if (error) throw error
+
+    if (count === 0) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: "Deleted successfully" }, { status: 200 })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: RouteParams
+): Promise<NextResponse> {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const result = await findUser(userId)
+    if (!result.resultStatus) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: result.errorStatus })
+    }
+
+    const internalUserId = result.findSuccess!.data.id
+
+    const { end_time } = await request.json()
+
+    // Verify user has access to this calendar
+    const props: VerifyParams = {
+      calendarId: params.id,
+      userId: internalUserId
+    }
+
+    const { resultStatus, resultMsg, errorStatus } = await verifyUser(props)
+
+    if (!resultStatus) {
+      return NextResponse.json({ error: resultMsg }, { status: errorStatus })
+    }
+
+    const { error, count } = await supabase
+      .from('events')
+      .update({ end_time: end_time })
       .eq('id', params.eventId)
 
     if (error) throw error
