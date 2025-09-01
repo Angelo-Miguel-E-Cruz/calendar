@@ -134,12 +134,13 @@ const useCalendarEvents = (id: string) => {
   }
 
   const handleResize = async (data: { event: EventApi }) => {
+    const endTime = formatDate(data.event.end!)
     try {
       const response = await fetch(`/api/calendars/${id}/events/${data.event.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          end_time: state.newEvent.end_time
+          end_time: endTime
         })
       })
 
