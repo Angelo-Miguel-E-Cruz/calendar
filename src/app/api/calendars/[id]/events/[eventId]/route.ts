@@ -130,7 +130,7 @@ export async function PUT(
 
     const internalUserId = result.findSuccess!.data.id
 
-    const { end_time } = await request.json()
+    const { start_time, end_time } = await request.json()
 
     // Verify user has access to this calendar
     const props: VerifyParams = {
@@ -146,7 +146,7 @@ export async function PUT(
 
     const { error, count } = await supabase
       .from('events')
-      .update({ end_time: end_time })
+      .update({ start_time: start_time, end_time: end_time })
       .eq('id', params.eventId)
 
     if (error) throw error

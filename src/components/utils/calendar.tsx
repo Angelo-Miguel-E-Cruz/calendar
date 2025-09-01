@@ -10,11 +10,10 @@ interface CalendarProps {
   allEvents: DatabaseEvent[],
   handleDateClick: (arg: { date: Date, allDay: boolean }) => void,
   handleDeleteModal: (data: { event: { id: string } }) => void,
-  handleResize: (data: { event: EventApi }) => void
+  handleChangeEvent: (data: { event: EventApi }) => void
 }
 
-
-export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, handleResize }: CalendarProps) {
+export default function Calendar({ allEvents, handleDateClick, handleDeleteModal, handleChangeEvent }: CalendarProps) {
 
   const transformedEvents = allEvents.map(event => ({
     id: event.id,
@@ -46,7 +45,8 @@ export default function Calendar({ allEvents, handleDateClick, handleDeleteModal
       events={transformedEvents as EventSourceInput}
       nowIndicator={true}
       editable={true}
-      eventResize={(event) => handleResize(event)}
+      eventDrop={(event) => handleChangeEvent(event)}
+      eventResize={(event) => handleChangeEvent(event)}
       selectable={true}
       selectMirror={true}
       dateClick={handleDateClick}

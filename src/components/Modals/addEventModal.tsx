@@ -11,15 +11,15 @@ interface addEventProps {
   eventTitle: string,
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  changeAllDay: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  handleStartTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  handleEndTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  // changeAllDay: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  // handleStartTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  // handleEndTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
   onCancel: () => void
 }
 
 export default function AddEvent({
   isOpen, onClose, eventTitle, startTime, endTime, handleSubmit, handleChange,
-  onCancel, allDay, changeAllDay, handleStartTime, handleEndTime }: addEventProps) {
+  onCancel, allDay/*, changeAllDay, handleStartTime, handleEndTime*/ }: addEventProps) {
   return (
     <Modal
       isOpen={isOpen}
