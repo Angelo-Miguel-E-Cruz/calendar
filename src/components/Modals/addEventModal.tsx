@@ -4,6 +4,7 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 
 interface addEventProps {
   isOpen: boolean,
+  startTime: string | null,
   endTime: string | null,
   allDay: boolean
   onClose: () => void,
@@ -11,11 +12,14 @@ interface addEventProps {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
   changeAllDay: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  handleStartTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
   handleEndTime: (e: React.ChangeEvent<HTMLInputElement>) => void,
   onCancel: () => void
 }
 
-export default function AddEvent({ isOpen, onClose, eventTitle, endTime, handleSubmit, handleChange, onCancel, allDay, changeAllDay, handleEndTime }: addEventProps) {
+export default function AddEvent({
+  isOpen, onClose, eventTitle, startTime, endTime, handleSubmit, handleChange,
+  onCancel, allDay, changeAllDay, handleStartTime, handleEndTime }: addEventProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -38,40 +42,58 @@ export default function AddEvent({ isOpen, onClose, eventTitle, endTime, handleS
                             sm:text-sm sm:leading-6"
                   value={eventTitle ?? ""} onChange={(e) => handleChange(e)} placeholder="Title" />
               </div>
-              <div className="mt-5 flex items-center space-x-3">
+              {/* <div className="mt-5 flex items-center space-x-3">
                 <input
                   type="checkbox"
                   id="allDay"
                   checked={allDay}
                   onChange={(e) => changeAllDay(e)}
                 />
-                <span className="text-sm font-medium text-gray-600 cursor-pointer">
+                <label className="text-sm text-gray-600 font-medium cursor-pointer">
                   All Day?
-                </span>
-              </div>
-              {!allDay && (
-                <div className="flex flex-col gap-2 mt-5 ">
-                  <span className="text-sm text-start font-medium text-gray-600 cursor-pointer">
-                    End Time
-                  </span>
-                  <input
-                    id="endTime"
-                    type="time"
-                    value={endTime || ""}
-                    onChange={(e) => handleEndTime(e)}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 
+                </label>
+              </div> */}
+              {/* {!allDay && (
+                <div className="grid grid-cols-2 gap-2 mt-5">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm text-start text-gray-600 font-medium cursor-pointer">
+                      Start Time
+                    </label>
+                    <input
+                      id="startTime"
+                      type="time"
+                      value={startTime || ""}
+                      onChange={(e) => handleStartTime(e)}
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                             shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
                             focus:ring-2 
                             focus:ring-inset focus:ring-violet-600 
                             sm:text-sm sm:leading-6"
-                  />
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm text-start text-gray-600 font-medium cursor-pointer">
+                      End Time
+                    </label>
+                    <input
+                      id="endTime"
+                      type="time"
+                      value={endTime || ""}
+                      onChange={(e) => handleEndTime(e)}
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 
+                            shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
+                            focus:ring-2 
+                            focus:ring-inset focus:ring-violet-600 
+                            sm:text-sm sm:leading-6"
+                    />
+                  </div>
                 </div>
-              )}
+              )} */}
               <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                 <button
                   type="submit"
                   className="inline-flex w-full justify-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:col-start-2 disabled:opacity-25"
-                  disabled={!eventTitle.trim() || (!allDay && !endTime?.trim())}
+                  disabled={!eventTitle.trim() || (!allDay && !endTime?.trim() && !startTime?.trim())}
                 >
                   Create
                 </button>

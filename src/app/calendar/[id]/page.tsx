@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, use, useReducer } from 'react'
-import { DatabaseEvent, CalendarWithMembers } from '@/lib/exports'
+import { DatabaseEvent, CalendarWithMembers, formatDate } from '@/lib/exports'
 import { createServerClient } from '@/lib/supabase/client'
 import Calendar from "@/components/utils/calendar";
 import AddEvent from "@/components/modals/addEventModal";
@@ -16,14 +16,42 @@ const useCalendarEvents = (id: string) => {
 
   const [state, dispatch] = useReducer(Reducer, initialState)
 
+  const detectDateType = (input: string): "time" | "datetime" | "invalid" => {
+    if (/^\d{2}:\d{2}$/.test(input)) return "time";
+    if (!isNaN(Date.parse(input))) return "datetime";
+    return "invalid";
+  }
+
   const addEvent = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
 
-    const date = new Date(Date.parse(state.newEvent.start_time))
-    const start = formatDate(date, state.newEvent.allDay)
-    console.log("event name:", state.newEvent.title)
-    console.log("event start: ", start)
-    console.log("all day?", state.newEvent.allDay)
+    var start, end: string
+
+    if (detectDateType(state.newEvent.start_time) === "datetime") {
+      const startDate = new Date(Date.parse(state.newEvent.start_time))
+      start = formatDate(startDate, state.newEvent.allDay)
+    } else {
+      start = formatDate(state.newEvent.start_time, state.newEvent.allDay)
+    }
+
+    if (state.newEvent.end_time) {
+      if (detectDateType(state.newEvent.end_time) === "datetime") {
+        const endDate = new Date(Date.parse(state.newEvent.end_time))
+        end = formatDate(endDate, state.newEvent.allDay)
+      } else {
+        end = formatDate(state.newEvent.end_time, state.newEvent.allDay)
+      }
+    } else {
+      end = start
+    }
+
+    console.log("Creating event: ", {
+      title: state.newEvent.title,
+      description: state.newEvent.description,
+      start_time: start,
+      allDay: state.newEvent.allDay,
+      end_time: end
+    })
 
     try {
       const response = await fetch(`/api/calendars/${id}/events`, {
@@ -34,12 +62,13 @@ const useCalendarEvents = (id: string) => {
           description: state.newEvent.description,
           start_time: start,
           allDay: state.newEvent.allDay,
-          end_time: state.newEvent.end_time
+          end_time: end
         })
       })
 
       const result = await response.json()
       const event: DatabaseEvent = result.event
+      console.log(event)
       dispatch({ type: 'ADD_DB_EVENT', payload: event })
     } catch (error) {
       console.error('Error adding event:', error)
@@ -117,22 +146,6 @@ const useCalendarEvents = (id: string) => {
     }
   }
 
-  const formatDate = (date: Date, allDay?: boolean): string => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-
-    if (allDay) {
-      return `${year}-${month}-${day}`
-    } else {
-      const hours = String(date.getHours()).padStart(2, '0')
-      const minutes = String(date.getMinutes()).padStart(2, '0')
-      const seconds = String(date.getSeconds()).padStart(2, '0')
-
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-    }
-  }
-
   const handleResize = async (data: { event: EventApi }) => {
     const endTime = formatDate(data.event.end!)
     try {
@@ -148,15 +161,6 @@ const useCalendarEvents = (id: string) => {
         const errorData = await response.json()
         console.log(errorData.error)
       }
-
-      // const newEvent: DatabaseEvent = {
-      //   ...oldEvent!,
-      //   end_time: eventEnd
-      // }
-
-      // console.log(newEvent)
-
-      // dispatch({ type: 'UPDATE_DB_EVENT', payload: { id: state.editId!, event: newEvent } })
     } catch (error) {
       console.error('Error editing event:', error)
     } finally {
@@ -164,7 +168,7 @@ const useCalendarEvents = (id: string) => {
     }
   }
 
-  return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, formatDate, handleResize }
+  return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleResize }
 }
 
 // add loading !
@@ -205,6 +209,10 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
     dispatch({ type: 'SET_NEW_EVENT', payload: { allDay: e.target.checked } })
   }
 
+  const handleStartTime = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'SET_NEW_EVENT', payload: { start_time: e.target.value } })
+  }
+
   const handleEndTime = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'SET_NEW_EVENT', payload: { end_time: e.target.value } })
   }
@@ -237,12 +245,14 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
       <AddEvent
         isOpen={state.modals.showModal}
         allDay={state.newEvent.allDay}
+        startTime={state.newEvent.start_time}
         endTime={state.newEvent.end_time}
         onClose={() => dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })}
         eventTitle={state.newEvent.title}
         handleSubmit={addEvent}
         handleChange={handleChange}
         changeAllDay={handleAllDayChange}
+        handleStartTime={handleStartTime}
         handleEndTime={handleEndTime}
         onCancel={handleCloseModal} />
 
