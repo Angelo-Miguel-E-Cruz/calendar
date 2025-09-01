@@ -8,6 +8,7 @@ import DeleteEvent from "@/components/modals/deleteEventModal";
 import Reducer from "@/lib/reducers/reducer";
 import { initialState } from "@/lib/states/states";
 import { EventApi } from '@fullcalendar/core/index.js';
+import Loading from '@/components/utils/loading';
 
 const supabase = createServerClient()
 
@@ -16,13 +17,14 @@ const useCalendarEvents = (id: string) => {
 
   const [state, dispatch] = useReducer(Reducer, initialState)
 
-  const detectDateType = (input: string): "time" | "datetime" | "invalid" => {
-    if (/^\d{2}:\d{2}$/.test(input)) return "time";
-    if (!isNaN(Date.parse(input))) return "datetime";
-    return "invalid";
-  }
+  // const detectDateType = (input: string): "time" | "datetime" | "invalid" => {
+  //   if (/^\d{2}:\d{2}$/.test(input)) return "time";
+  //   if (!isNaN(Date.parse(input))) return "datetime";
+  //   return "invalid";
+  // }
 
   const addEvent = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Adding Event" } })
     e.preventDefault()
 
     // var start, end: string
@@ -64,12 +66,14 @@ const useCalendarEvents = (id: string) => {
     } catch (error) {
       console.error('Error adding event:', error)
     } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
       dispatch({ type: 'RESET_PROPERTY', payload: 'newEvent' })
       dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })
     }
   }
 
   const handleDelete = async (): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Deleting Event" } })
     try {
       const response = await fetch(`/api/calendars/${id}/events/${state.deleteId}`, {
         method: 'DELETE'
@@ -84,28 +88,35 @@ const useCalendarEvents = (id: string) => {
     } catch (error) {
       console.error('Error deleting event:', error)
     } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
       dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showDeleteModal', isOpen: false } })
       dispatch({ type: 'RESET_PROPERTY', payload: 'deleteId' })
     }
   }
 
   const fetchCalendar = async (): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Calendar Info" } })
     try {
       const response = await fetch(`/api/calendars/${id}`)
       const data: { calendar: CalendarWithMembers } = await response.json()
       dispatch({ type: 'SET_PROPERTY', payload: { type: 'calendar', value: data.calendar } })
     } catch (error) {
       console.error('Error fetching calendar:', error)
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
 
   const fetchEvents = async (): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Events" } })
     try {
       const response = await fetch(`/api/calendars/${id}/events`)
       const data: { events: DatabaseEvent[] } = await response.json()
       dispatch({ type: 'SET_PROPERTY', payload: { type: 'dbEvents', value: data.events || [] } })
     } catch (error) {
       console.error('Error fetching events:', error)
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
     }
   }
 
@@ -229,6 +240,8 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
   return (
     <div className="px-6 pb-6">
       <h1 className='text-2xl'>{state.calendar?.name}</h1>
+
+      {state.loading.isLoading && (<Loading loadingMessage={state.loading.loadingMsg} />)}
 
       <Calendar
         allEvents={state.dbEvents}

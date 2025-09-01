@@ -5,6 +5,14 @@ export default function Reducer(state: AppState, action: ActionType) {
   const { type } = action
 
   switch (type) {
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: {
+          isLoading: action.payload.loadingValue,
+          loadingMsg: action.payload.loadingValue && action.payload.message ? action.payload.message : "Loading"
+        }
+      }
     case 'TOGGLE_MODAL':
       return {
         ...state,

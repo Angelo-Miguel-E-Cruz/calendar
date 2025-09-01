@@ -49,6 +49,10 @@ export type ListActionType =
 export interface AppState {
   newEvent: NewEvent,
   deleteId: string | null,
+  loading: {
+    isLoading: boolean
+    loadingMsg: string
+  }
   modals: {
     showModal: boolean,
     showDeleteModal: boolean
@@ -66,6 +70,10 @@ export const initialState: AppState = {
     allDay: true
   },
   deleteId: null,
+  loading: {
+    isLoading: false,
+    loadingMsg: "Loading"
+  },
   modals: {
     showModal: false,
     showDeleteModal: false
@@ -88,3 +96,4 @@ export type ActionType =
   // Util
   | { type: 'SET_PROPERTY', payload: { type: keyof AppState, value: string | DatabaseEvent[] | CalendarWithMembers | null } }
   | { type: 'RESET_PROPERTY', payload: keyof AppState }
+  | { type: 'SET_LOADING', payload: { loadingValue: boolean, message?: string } }
