@@ -63,7 +63,7 @@ export const initialState: AppState = {
     description: null,
     start_time: '',
     end_time: null,
-    allDay: false
+    allDay: true
   },
   deleteId: null,
   modals: {
@@ -79,7 +79,7 @@ export type ActionType =
   // Events
   | { type: 'ADD_DB_EVENT', payload: DatabaseEvent }
   | { type: 'UPDATE_DB_EVENT', payload: { id: string, event: DatabaseEvent } }
-  | { type: 'REMOVE_DB_EVENT', payload: string }
+  | { type: 'REMOVE_DB_EVENT', payload: string | null }
 
   // UI
   | { type: 'TOGGLE_MODAL', payload: { modal: keyof AppState['modals'], isOpen: boolean } }

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         calendar_members(user_id, role, users(name))
       `)
       .eq('id', params.id)
-      .single()
+      .maybeSingle()
 
     if (error) throw error
 

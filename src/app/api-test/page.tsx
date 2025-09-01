@@ -138,10 +138,37 @@ export default function ApiTestPage() {
         })
       })
       const data = await response.json()
+      if (response.ok && data.event?.id) {
+        window.lastEventId = data.event.id
+      }
       addResult(`POST /api/calendars/${calendarId}/events`, { status: response.status, data }, response.ok)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       addResult('POST /api/calendars/[id]/events', { error: errorMessage }, false)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const testRemoveEvent = async () => {
+    const calendarId = window.lastCalendarId
+    const eventId = window.lastEventId
+    if (!calendarId) {
+      addResult('DELETE /api/calendars/[id]/events/[id]', { error: 'No calendar ID. Create a calendar first.' }, false)
+      return
+    }
+
+    console.log(calendarId, eventId)
+
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/calendars/${calendarId}/events/${eventId}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      addResult(`DELETE /api/calendars/[id]/events/[id]`, { status: response.status, data }, response.ok)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      addResult('DELETE /api/calendars/[id]/events/[id]', { error: errorMessage }, false)
     } finally {
       setLoading(false)
     }
@@ -254,6 +281,14 @@ export default function ApiTestPage() {
         </button>
 
         <button
+          onClick={testRemoveEvent}
+          disabled={loading}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+        >
+          Test Remove Event
+        </button>
+
+        <button
           onClick={testInviteUser}
           disabled={loading}
           className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 disabled:opacity-50"
@@ -326,6 +361,7 @@ export default function ApiTestPage() {
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    lastCalendarId: string
+    lastCalendarId: string,
+    lastEventId: string
   }
 }

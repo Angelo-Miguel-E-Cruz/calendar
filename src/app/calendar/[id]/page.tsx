@@ -2,13 +2,11 @@
 import { useEffect, use, useReducer } from 'react'
 import { DatabaseEvent, CalendarWithMembers } from '@/lib/exports'
 import { createServerClient } from '@/lib/supabase/client'
-import { EventSourceInput } from '@fullcalendar/core/index.js'
 import Calendar from "@/components/utils/calendar";
 import AddEvent from "@/components/modals/addEventModal";
 import DeleteEvent from "@/components/modals/deleteEventModal";
 import Reducer from "@/lib/reducers/reducer";
 import { initialState } from "@/lib/states/states";
-import { DropArg } from '@fullcalendar/interaction/index.js'
 
 const supabase = createServerClient()
 
@@ -20,6 +18,10 @@ const useCalendarEvents = (id: string) => {
   const addEvent = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
 
+    const date = new Date(Date.parse(state.newEvent.start_time))
+    const start = formatDate(date, state.newEvent.allDay)
+    console.log(start, state.newEvent.allDay)
+
     try {
       const response = await fetch(`/api/calendars/${id}/events`, {
         method: 'POST',
@@ -27,7 +29,7 @@ const useCalendarEvents = (id: string) => {
         body: JSON.stringify({
           title: state.newEvent.title,
           description: state.newEvent.description,
-          start_time: state.newEvent.start_time,
+          start_time: start,
           all_day: state.newEvent.allDay,
           end_time: state.newEvent.end_time
         })
@@ -45,12 +47,18 @@ const useCalendarEvents = (id: string) => {
   }
 
   const handleDelete = async (): Promise<void> => {
+    console.log('Deleting event:', state.deleteId, 'from calendar:', id)
     try {
-      const response = await fetch(`/api/calendars/${id}`, {
+      const response = await fetch(`/api/calendars/${id}/events/${state.deleteId}`, {
         method: 'DELETE'
       })
 
-      dispatch({ type: 'REMOVE_DB_EVENT', payload: id })
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.log(errorData.error)
+      }
+
+      dispatch({ type: 'REMOVE_DB_EVENT', payload: state.deleteId })
     } catch (error) {
       console.error('Error deleting event:', error)
     } finally {
@@ -107,13 +115,31 @@ const useCalendarEvents = (id: string) => {
     }
   }
 
-  return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription }
+  const formatDate = (date: Date, allDay: boolean): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+
+    if (allDay) {
+      return `${year}-${month}-${day}`
+    } else {
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    }
+  }
+
+  return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, formatDate }
 }
+
+// add loading !
 
 export default function CalendarView({ params }: { params: Promise<{ id: string }> }) {
 
   const { id } = use(params)
-  const { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription } = useCalendarEvents(id)
+  const { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, formatDate } = useCalendarEvents(id)
 
 
   const handleDateClick = (arg: { date: Date, allDay: boolean }) => {
@@ -142,6 +168,10 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
     dispatch({ type: 'SET_NEW_EVENT', payload: { title: e.target.value } })
   }
 
+  const handleAllDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'SET_NEW_EVENT', payload: { allDay: e.target.checked } })
+  }
+
   useEffect(() => {
     fetchCalendar()
     fetchEvents()
@@ -150,12 +180,8 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
     return cleanup
   }, [id])
 
-  useEffect(() => {
-    console.log(state.dbEvents)
-  }, [state.dbEvents])
-
   return (
-    <div className="p-6">
+    <div className="px-6 pb-6">
       <h1 className='text-2xl'>{state.calendar?.name}</h1>
 
       <Calendar
@@ -172,10 +198,12 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
 
       <AddEvent
         isOpen={state.modals.showModal}
+        allDay={state.newEvent.allDay}
         onClose={() => dispatch({ type: 'TOGGLE_MODAL', payload: { modal: 'showModal', isOpen: false } })}
         eventTitle={state.newEvent.title}
         handleSubmit={addEvent}
         handleChange={handleChange}
+        changeAllDay={handleAllDayChange}
         onCancel={handleCloseModal} />
 
     </div>

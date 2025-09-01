@@ -15,13 +15,13 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
-          enterTo="opacity-100"
+          enterTo="opacity-80"
           leave="ease-in duration-200"
-          leaveFrom="opacity-100"
+          leaveFrom="opacity-80"
           leaveTo="opacity-0"
 
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-black opacity-80 transition-opacity" />
         </TransitionChild>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">

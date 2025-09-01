@@ -4,14 +4,16 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 
 interface addEventProps {
   isOpen: boolean,
+  allDay: boolean
   onClose: () => void,
   eventTitle: string,
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  changeAllDay: (e: React.ChangeEvent<HTMLInputElement>) => void,
   onCancel: () => void
 }
 
-export default function AddEvent({ isOpen, onClose, eventTitle, handleSubmit, handleChange, onCancel }: addEventProps) {
+export default function AddEvent({ isOpen, onClose, eventTitle, handleSubmit, handleChange, onCancel, allDay, changeAllDay }: addEventProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -33,6 +35,17 @@ export default function AddEvent({ isOpen, onClose, eventTitle, handleSubmit, ha
                             focus:ring-inset focus:ring-violet-600 
                             sm:text-sm sm:leading-6"
                   value={eventTitle ?? ""} onChange={(e) => handleChange(e)} placeholder="Title" />
+              </div>
+              <div className="mt-5 flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="allDay"
+                  checked={allDay}
+                  onChange={(e) => changeAllDay(e)}
+                />
+                <span className="text-sm font-medium text-gray-900 cursor-pointer">
+                  All Day?
+                </span>
               </div>
               <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                 <button

@@ -1,12 +1,12 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/supabase-server'
-import { DatabaseEvent } from '@/lib/exports'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 
 interface RouteParams {
   params: {
-    id: string
+    id: string,
+    eventId: string
   }
 }
 
@@ -26,7 +26,6 @@ const supabase = createAdminClient()
 
 async function verifyUser({ calendarId, userId }: VerifyParams): Promise<ResultParams> {
   try {
-    // Verify user has access to this calendar
     const { data: membership } = await supabase
       .from('calendar_members')
       .select('id')
@@ -35,7 +34,7 @@ async function verifyUser({ calendarId, userId }: VerifyParams): Promise<ResultP
       .single()
 
     if (!membership) {
-      return { resultStatus: false, resultMsg: 'Forbidden', errorStatus: 403 }
+      return { resultStatus: false, resultMsg: calendarId, errorStatus: 403 }
     }
     return { resultStatus: true }
   } catch (error) {
@@ -66,97 +65,51 @@ async function findUser(userId: string): Promise<ResultParams> {
   }
 }
 
-export async function GET(
+export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
 ): Promise<NextResponse> {
   try {
+    console.log('DELETE route called with params:', params)
+
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const result = findUser(userId)
-    const { findSuccess: userQuery } = await result
-    const internalUserId = userQuery!.data.id
-
-    // Verify user has access to this 
-    const props: VerifyParams = {
-      calendarId: params.id,
-      userId: internalUserId
-    }
-    const { resultStatus, resultMsg, errorStatus } = await verifyUser(props)
-    if (!resultStatus) {
-      return NextResponse.json({ error: resultMsg }, { status: errorStatus })
+    const result = await findUser(userId)
+    if (!result.resultStatus) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: result.errorStatus })
     }
 
-    const { data: events, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('calendar_id', params.id)
-      .order('start_time', { ascending: true })
-
-    if (error) throw error
-
-    return NextResponse.json({ events: events as DatabaseEvent[] })
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: errorMessage }, { status: 400 })
-  }
-}
-
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-): Promise<NextResponse> {
-  try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const result = findUser(userId)
-    const { findSuccess: userQuery } = await result
-    const internalUserId = userQuery!.data.id
-
-    const body: {
-      title: string
-      description?: string
-      start_time: string
-      end_time?: string
-      allDay: boolean
-    } = await request.json()
-
-    const { title, description, start_time, end_time, allDay } = body
+    const internalUserId = result.findSuccess!.data.id
 
     // Verify user has access to this calendar
     const props: VerifyParams = {
       calendarId: params.id,
       userId: internalUserId
     }
+
     const { resultStatus, resultMsg, errorStatus } = await verifyUser(props)
+
     if (!resultStatus) {
       return NextResponse.json({ error: resultMsg }, { status: errorStatus })
     }
 
-    const { data: event, error } = await supabase
+    const { error, count } = await supabase
       .from('events')
-      .insert({
-        calendar_id: params.id,
-        title,
-        description,
-        start_time,
-        end_time,
-        allDay,
-        created_by: internalUserId
-      })
-      .select()
-      .single()
+      .delete({ count: 'exact' })
+      .eq('id', params.eventId)
 
     if (error) throw error
 
-    return NextResponse.json({ event: event as DatabaseEvent, req: body })
+    if (count === 0) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: "Deleted successfully" }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 400 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
