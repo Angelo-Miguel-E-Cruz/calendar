@@ -3,12 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/supabase-server'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 
-interface RouteParams {
-  params: {
-    id: string,
-    eventId: string
-  }
-}
+type RouteContext = { params: { id: string; eventId: string } }
 
 interface VerifyParams {
   calendarId: string,
@@ -67,7 +62,7 @@ async function findUser(userId: string): Promise<ResultParams> {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: RouteContext
 ): Promise<NextResponse> {
   try {
 
@@ -115,7 +110,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: RouteContext
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth()
