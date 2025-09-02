@@ -103,40 +103,37 @@ export default function Default() {
 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto w-full">
-        {!state.loading.isLoading &&
-          state.calendars.length > 0 ? (
-          state.calendars.map((calendar) => {
-            return (
-              <div className="group calendar-card"
-                key={calendar.id}
-                onClick={() => !state.ui.isEditMode && navToCalendar(calendar.id)}>
-                <div className='p-4 flex-1'>
+        {state.loading.isLoading ? <Loading loadingMessage={state.loading.loadingMsg} />
+          : state.calendars.length > 0 ? (
+            state.calendars.map((calendar) => {
+              return (
+                <div className="group calendar-card"
+                  key={calendar.id}
+                  onClick={() => !state.ui.isEditMode && navToCalendar(calendar.id)}>
+                  <div className='p-4 flex-1'>
 
-                  <h2 className="font-semibold text-lg text-card-foreground group-hover:text-purple-400 transition-colors">{calendar.name}</h2>
+                    <h2 className="font-semibold text-lg text-card-foreground group-hover:text-purple-400 transition-colors">{calendar.name}</h2>
 
-                  <div className="flex items-center gap-2 mt-2 text-sm text-gray-200">
-                    <span> <ClockIcon className='h-4 w-4' /> </span>
-                    Last update:
-                    <span className='font-semibold'>{formatDateTime(calendar.updated_at)} </span>
+                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-200">
+                      <span> <ClockIcon className='h-4 w-4' /> </span>
+                      Last update:
+                      <span className='font-semibold'>{formatDateTime(calendar.updated_at)} </span>
+                    </div>
+
                   </div>
-
+                  {state.ui.isEditMode && (
+                    <button
+                      className="bg-red-500 text-white w-8 h-full flex items-center justify-center rounded-r text-4xl"
+                      onClick={() => removeCalendar(calendar.id)}>
+                      <XMarkIcon className='h-8 w-8' />
+                    </button>
+                  )}
                 </div>
-                {state.ui.isEditMode && (
-                  <button
-                    className="bg-red-500 text-white w-8 h-full flex items-center justify-center rounded-r text-4xl"
-                    onClick={() => removeCalendar(calendar.id)}>
-                    <XMarkIcon className='h-8 w-8' />
-                  </button>
-                )}
-              </div>
-            )
-          })) : (
-          <Fallback openModal={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: true } })} />
-        )
-        }
+              )
+            })) : (
+            <Fallback openModal={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: true } })} />
+          )}
       </div>
-
-      {state.loading.isLoading && (<Loading loadingMessage={state.loading.loadingMsg} />)}
 
       <AddCalendar
         isOpen={state.ui.addCalendar}

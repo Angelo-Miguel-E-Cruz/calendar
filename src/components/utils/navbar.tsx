@@ -41,9 +41,12 @@ export default function Navbar() {
         console.log(errorData.error)
       }
 
+      console.log("Invite Succesful")
+
     } catch (error) {
       console.error('Error inviting user: ', error)
     } finally {
+      handleCloseModal()
     }
   }
 
