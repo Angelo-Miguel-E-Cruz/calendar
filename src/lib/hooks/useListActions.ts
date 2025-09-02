@@ -3,6 +3,7 @@ import { Calendar } from "../exports"
 import ListReducer from "../reducers/listReducer"
 import { initialListState } from "../states/states"
 
+// memo-ize?
 export function useListActions() {
   const [state, dispatch] = useReducer(ListReducer, initialListState)
 
