@@ -99,7 +99,8 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="flex items-center bg-purple-600 hover:bg-purple-700 text-white gap-2 py-1 px-2 rounded">
+                  <button className="flex items-center bg-purple-600 hover:bg-purple-700 text-white gap-2 py-1 px-2 rounded"
+                    onClick={() => setOpenInvite(true)}>
                     <UsersIcon className="h-4 w-4" />
                     Invite
                   </button>
