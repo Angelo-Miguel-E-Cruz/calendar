@@ -26,8 +26,9 @@ export async function POST(
       .eq('user_id', userId)
       .single()
 
+
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: membership }, { status: 403 })
     }
 
     // Find user by email

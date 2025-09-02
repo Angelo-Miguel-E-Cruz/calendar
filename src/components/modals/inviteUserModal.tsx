@@ -18,7 +18,7 @@ export default function InviteUser({ isOpen, onClose, userEmail, handleSubmit, h
       onClose={onClose}>
       <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-          <div className="sm:flex sm:items-start">
+          <div className="w-full sm:flex sm:items-start">
             <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center 
                       justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
               <UserPlusIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
@@ -29,12 +29,12 @@ export default function InviteUser({ isOpen, onClose, userEmail, handleSubmit, h
               </DialogTitle>
               <form action="submit" onSubmit={handleSubmit}>
                 <div className="mt-2">
-                  <input type="text" name="title" className="block w-full rounded-md border-0 py-1.5 text-gray-900 
+                  <input type="text" name="email" className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                             shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
                             focus:ring-2 
                             focus:ring-inset focus:ring-violet-600 
                             sm:text-sm sm:leading-6"
-                    value={userEmail ?? ""} onChange={(e) => handleChange(e)} placeholder="Title" />
+                    value={userEmail ?? ""} onChange={(e) => handleChange(e)} placeholder="Email" />
                 </div>
                 <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                   <button
