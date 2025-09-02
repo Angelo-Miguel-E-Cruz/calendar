@@ -59,38 +59,42 @@ export default function Default() {
   return (
     <div className="flex justify-center flex-col px-20">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-300">Calendars</h1>{
+
+        {
           state.calendars.length > 0 ? (
-            <div className="flex items-center gap-3">
+            <>
+              <h1 className="text-3xl font-bold text-gray-300">Calendars</h1>
+              <div className="flex items-center gap-3">
 
-              <button className={`${!state.ui.isEditMode ? "btn-edit-calendar" : "btn-remove-calendar"}`}
-                onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'isEditMode', value: !state.ui.isEditMode } })}>
-                {state.ui.isEditMode ? (
-                  <>
-                    <XMarkIcon className="h-4 w-4" />
-                    <span className="text-md">Delete</span>
-                  </>
-                ) : (
-                  <>
-                    <PencilSquareIcon className="h-4 w-4" />
-                    <span className="text-md">Edit</span>
-                  </>
-                )}
-              </button>
+                <button className={`${!state.ui.isEditMode ? "btn-edit-calendar" : "btn-remove-calendar"}`}
+                  onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'isEditMode', value: !state.ui.isEditMode } })}>
+                  {state.ui.isEditMode ? (
+                    <>
+                      <XMarkIcon className="h-4 w-4" />
+                      <span className="text-md">Delete</span>
+                    </>
+                  ) : (
+                    <>
+                      <PencilSquareIcon className="h-4 w-4" />
+                      <span className="text-md">Edit</span>
+                    </>
+                  )}
+                </button>
 
-              <button
-                className="btn-add-calendar"
-                onClick={() =>
-                  dispatch({
-                    type: "SET_UI",
-                    payload: { ui: "addCalendar", value: true },
-                  })
-                }
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span className="text-md">Create</span>
-              </button>
-            </div>
+                <button
+                  className="btn-add-calendar"
+                  onClick={() =>
+                    dispatch({
+                      type: "SET_UI",
+                      payload: { ui: "addCalendar", value: true },
+                    })
+                  }
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span className="text-md">Create</span>
+                </button>
+              </div>
+            </>
           ) : (
             <></>
           )

@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/supabase-server'
+
+const supabase = createAdminClient()
 
 export async function POST(
   request: NextRequest,
@@ -14,7 +16,6 @@ export async function POST(
     const body: { email: string } = await request.json()
     const { email } = body
 
-    const supabase = createServerClient()
     const resolvedParams = await params
 
     // Check if user has permission to invite (owner or admin)

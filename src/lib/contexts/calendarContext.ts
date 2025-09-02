@@ -2,8 +2,10 @@
 import { createContext, useContext } from "react"
 
 interface CalendarContextType {
-  calendarName: string;
-  setCalendarName: (name: string) => void;
+  calendarName: string
+  setCalendarName: (name: string) => void
+  calendarId: string
+  setCalendarId: (id: string) => void
 }
 
 export const CalendarContext = createContext<CalendarContextType | undefined>(undefined)
@@ -11,7 +13,6 @@ export const CalendarContext = createContext<CalendarContextType | undefined>(un
 export function useCalendarContext() {
   const context = useContext(CalendarContext)
 
-  console.log("useCalendarContext called, context value:", context);
   if (!context) {
     throw new Error("useCalendarContext hook must be used with a CalendarContext")
   }

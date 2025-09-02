@@ -7,17 +7,54 @@ import {
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeftIcon, UsersIcon } from '@heroicons/react/20/solid'
 import { useCalendarContext } from '@/lib/contexts/calendarContext'
+import { useState } from 'react'
+import InviteUser from '../modals/inviteUserModal'
 
 export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { calendarName } = useCalendarContext()
+  const { calendarName, calendarId } = useCalendarContext()
+
+  // use reducer !
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [openInvite, setOpenInvite] = useState(false)
 
   const navToHome = () => {
     router.push(`/`)
   }
 
   const isCalendarIdPage = pathname.startsWith("/calendar/") && pathname.split("/").length > 0
+
+  const handleInviteUser = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    try {
+      const response = await fetch(`/api/calendars/${calendarId}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.log(errorData.error)
+      }
+
+    } catch (error) {
+      console.error('Error inviting user: ', error)
+    } finally {
+    }
+  }
+
+  const handleCloseModal = () => {
+    setOpenInvite(false)
+    setInviteEmail("")
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInviteEmail(e.target.value)
+  }
 
   return (
     <nav className="flex mb-8 border-b border-b-violet-100 p-4">
@@ -30,6 +67,7 @@ export default function Navbar() {
           </button>
         </div>
       </SignedOut>
+
       <SignedIn>
         {!isCalendarIdPage ?
           (<div className='flex gap-3 w-full'>
@@ -72,6 +110,15 @@ export default function Navbar() {
             </>
           )}
       </SignedIn>
+
+      <InviteUser
+        isOpen={openInvite}
+        userEmail={inviteEmail}
+        onClose={() => setOpenInvite(false)}
+        onCancel={handleCloseModal}
+        handleChange={handleChange}
+        handleSubmit={handleInviteUser}
+      />
     </nav >
   )
 }

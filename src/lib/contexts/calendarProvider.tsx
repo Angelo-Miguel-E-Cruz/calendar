@@ -8,11 +8,11 @@ export default function CalendarProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [calendarName, setCalendarName] = useState<string>("");
+  const [calendarName, setCalendarName] = useState<string>("")
+  const [calendarId, setCalendarId] = useState<string>("")
 
-  console.log("CalendarProvider rendering with value:", { calendarName, setCalendarName });
   return (
-    <CalendarContext.Provider value={{ calendarName, setCalendarName }}>
+    <CalendarContext.Provider value={{ calendarName, setCalendarName, calendarId, setCalendarId }}>
       {children}
     </CalendarContext.Provider>
   );

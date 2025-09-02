@@ -9,7 +9,7 @@ import { useCalendarActions } from '@/lib/hooks/useCalendarActions';
 
 
 export default function CalendarView({ params }: { params: Promise<{ id: string }> }) {
-  const { setCalendarName } = useCalendarContext()
+  const { setCalendarName, setCalendarId } = useCalendarContext()
   const { id } = use(params)
   const { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleChangeEvent } = useCalendarActions(id)
 
@@ -53,7 +53,7 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
   // }
 
   useEffect(() => {
-    fetchCalendar(setCalendarName)
+    fetchCalendar(setCalendarName, setCalendarId)
     fetchEvents()
 
     const cleanup = setupRealtimeSubscription()
