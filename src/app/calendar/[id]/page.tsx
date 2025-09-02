@@ -13,9 +13,8 @@ import { useCalendarState } from '@/lib/hooks/useCalendarState';
 export default function CalendarView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { setCalendarName, setCalendarId } = useCalendarContext()
-  const { addEvent, handleDelete, setupRealtimeSubscription, handleChangeEvent } = useCalendarActions(id)
-  const { fetchCalendar, fetchEvents } = useSupaCalendar(id)
-  const { state, dispatch } = useCalendarState()
+  const { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleChangeEvent } = useCalendarActions(id)
+
 
   const handleDateClick = (arg: { date: Date, allDay: boolean }) => {
     dispatch({

@@ -1,14 +1,16 @@
 import { EventApi } from "@fullcalendar/core/index.js"
-import { DatabaseEvent, formatDate } from "../exports"
+import { useReducer } from "react"
+import { DatabaseEvent, CalendarWithMembers, formatDate } from "../exports"
+import Reducer from "../reducers/reducer"
+import { initialState } from "../states/states"
 import { createServerClient } from '@/lib/supabase/client'
-import { useCalendarState } from "./useCalendarState"
 
 const supabase = createServerClient()
 
 // memo-ize?
 export function useCalendarActions(id: string) {
 
-  const { state, dispatch } = useCalendarState()
+  const [state, dispatch] = useReducer(Reducer, initialState)
 
   // const detectDateType = (input: string): "time" | "datetime" | "invalid" => {
   //   if (/^\d{2}:\d{2}$/.test(input)) return "time";
@@ -87,6 +89,34 @@ export function useCalendarActions(id: string) {
     }
   }
 
+  const fetchCalendar = async (setCalendarName: (name: string) => void, setCalendarId: (id: string) => void): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Calendar Info" } })
+    try {
+      const response = await fetch(`/api/calendars/${id}`)
+      const data: { calendar: CalendarWithMembers } = await response.json()
+      dispatch({ type: 'SET_PROPERTY', payload: { type: 'calendar', value: data.calendar } })
+      setCalendarName(data.calendar.name)
+      setCalendarId(data.calendar.id)
+    } catch (error) {
+      console.error('Error fetching calendar:', error)
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
+    }
+  }
+
+  const fetchEvents = async (): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Events" } })
+    try {
+      const response = await fetch(`/api/calendars/${id}/events`)
+      const data: { events: DatabaseEvent[] } = await response.json()
+      dispatch({ type: 'SET_PROPERTY', payload: { type: 'dbEvents', value: data.events || [] } })
+    } catch (error) {
+      console.error('Error fetching events:', error)
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { loadingValue: false } })
+    }
+  }
+
   const setupRealtimeSubscription = () => {
     const subscription = supabase
       .channel(`calendar-${id}`)
@@ -147,5 +177,5 @@ export function useCalendarActions(id: string) {
     }
   }
 
-  return { addEvent, handleDelete, setupRealtimeSubscription, handleChangeEvent }
+  return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleChangeEvent }
 }
