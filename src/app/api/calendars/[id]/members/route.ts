@@ -2,15 +2,9 @@ import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/client'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
 export async function POST(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth()
@@ -21,12 +15,13 @@ export async function POST(
     const { email } = body
 
     const supabase = createServerClient()
+    const resolvedParams = await params
 
     // Check if user has permission to invite (owner or admin)
     const { data: membership } = await supabase
       .from('calendar_members')
       .select('role')
-      .eq('calendar_id', params.id)
+      .eq('calendar_id', resolvedParams.id)
       .eq('user_id', userId)
       .single()
 
@@ -49,7 +44,7 @@ export async function POST(
     const { error } = await supabase
       .from('calendar_members')
       .insert({
-        calendar_id: params.id,
+        calendar_id: resolvedParams.id,
         user_id: invitedUser.id,
         role: 'member' as const
       })

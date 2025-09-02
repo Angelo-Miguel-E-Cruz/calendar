@@ -3,15 +3,11 @@ import { auth } from '@clerk/nextjs/server'
 import { createAdminClient } from '@/lib/supabase/supabase-server'
 import { CalendarWithMembers } from '@/lib/exports'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
 const supabase = createAdminClient()
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { userId } = await auth()
     if (!userId) {
@@ -33,6 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const internalUserId = userQuery.data.id
+    const resolvedParams = await params
 
     const { data, error } = await supabase
       .from('calendars')
@@ -40,7 +37,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         *,
         calendar_members(user_id, role, users(name))
       `)
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .maybeSingle()
 
     if (error) throw error
@@ -62,12 +59,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const resolvedParams = await params
     const { error } = await supabase
       .from('calendars')
       .delete()
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
 
     if (error) throw error
 

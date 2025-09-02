@@ -78,10 +78,8 @@ export async function PUT(
     const internalUserId = result.findSuccess!.data.id
     const { start_time, end_time } = await request.json()
 
-    // Await the params since they're now a Promise
     const resolvedParams = await params
 
-    // Verify user has access to this calendar
     const props: VerifyParams = {
       calendarId: resolvedParams.id,
       userId: internalUserId

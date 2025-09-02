@@ -4,12 +4,6 @@ import { createAdminClient } from '@/lib/supabase/supabase-server'
 import { DatabaseEvent } from '@/lib/exports'
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
 interface VerifyParams {
   calendarId: string,
   userId: string
@@ -68,7 +62,7 @@ async function findUser(userId: string): Promise<ResultParams> {
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth()
@@ -80,9 +74,11 @@ export async function GET(
     const { findSuccess: userQuery } = await result
     const internalUserId = userQuery!.data.id
 
+    const resolvedParams = await params
+
     // Verify user has access to this 
     const props: VerifyParams = {
-      calendarId: params.id,
+      calendarId: resolvedParams.id,
       userId: internalUserId
     }
     const { resultStatus, resultMsg, errorStatus } = await verifyUser(props)
@@ -93,7 +89,7 @@ export async function GET(
     const { data: events, error } = await supabase
       .from('events')
       .select('*')
-      .eq('calendar_id', params.id)
+      .eq('calendar_id', resolvedParams.id)
       .order('start_time', { ascending: true })
 
     if (error) throw error
@@ -107,7 +103,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const { userId } = await auth()
@@ -129,9 +125,11 @@ export async function POST(
 
     const { title, description, start_time, end_time, allDay } = body
 
+    const resolvedParams = await params
+
     // Verify user has access to this calendar
     const props: VerifyParams = {
-      calendarId: params.id,
+      calendarId: resolvedParams.id,
       userId: internalUserId
     }
     const { resultStatus, resultMsg, errorStatus } = await verifyUser(props)
@@ -142,7 +140,7 @@ export async function POST(
     const { data: event, error } = await supabase
       .from('events')
       .insert({
-        calendar_id: params.id,
+        calendar_id: resolvedParams.id,
         title,
         description,
         start_time,
