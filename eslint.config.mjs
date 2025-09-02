@@ -20,7 +20,7 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
     rules: {
-      'https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
 
     }
   },

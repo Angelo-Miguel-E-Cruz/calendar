@@ -1,4 +1,4 @@
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Dialog, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, ReactNode } from "react";
 
 interface ModalProps {
