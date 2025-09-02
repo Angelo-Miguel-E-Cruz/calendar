@@ -2,8 +2,8 @@
 import { useCalendarContext } from '@/lib/contexts/calendarContext';
 import { useEffect, use } from 'react'
 import Calendar from "@/components/utils/calendar";
-import AddEvent from "@/components/modals/addEventModal";
-import DeleteEvent from "@/components/modals/deleteEventModal";
+import AddEvent from "../../../components/modals/addEventModal";
+import DeleteEvent from "../../../components/modals/deleteEventModal";
 import Loading from '@/components/utils/loading';
 import { useCalendarActions } from '@/lib/hooks/useCalendarActions';
 
