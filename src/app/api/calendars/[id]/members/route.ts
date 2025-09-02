@@ -1,4 +1,4 @@
-import { useUser } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/client'
 
@@ -13,8 +13,7 @@ export async function POST(
   { params }: RouteParams
 ): Promise<NextResponse> {
   try {
-    const { user } = useUser()
-    const userId = user?.id
+    const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

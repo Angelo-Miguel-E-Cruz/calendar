@@ -3,7 +3,7 @@ export function generateID(): number {
 }
 
 export function formatDate(input: string | Date, allDay?: boolean): string {
-  var date: Date
+  let date: Date
 
   if (input instanceof Date) {
     date = input
