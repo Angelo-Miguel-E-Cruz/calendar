@@ -91,9 +91,17 @@ export async function PUT(
       return NextResponse.json({ error: resultMsg }, { status: errorStatus })
     }
 
+    const event = await supabase
+      .from('events')
+      .select('version')
+      .eq('id', resolvedParams.eventId)
+      .maybeSingle()
+
+    const eventVersion = event.data?.version
+
     const { error, count } = await supabase
       .from('events')
-      .update({ start_time: start_time, end_time: end_time })
+      .update({ start_time: start_time, end_time: end_time, version: eventVersion })
       .eq('id', resolvedParams.eventId)
 
     if (error) throw error
