@@ -13,6 +13,23 @@ export async function POST(
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userQuery = await supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_id', userId)
+      .maybeSingle()
+
+    if (userQuery.error) {
+      const err = userQuery.error
+      return NextResponse.json({ err }, { status: userQuery.status })
+    }
+    if (!userQuery.data) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    const internalUserId = userQuery.data.id
+
     const body: { email: string } = await request.json()
     const { email } = body
 
@@ -23,12 +40,12 @@ export async function POST(
       .from('calendar_members')
       .select('role')
       .eq('calendar_id', resolvedParams.id)
-      .eq('user_id', userId)
+      .eq('user_id', internalUserId)
       .single()
 
 
     if (!membership || !['owner', 'admin'].includes(membership.role)) {
-      return NextResponse.json({ error: membership }, { status: 403 })
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
     // Find user by email
