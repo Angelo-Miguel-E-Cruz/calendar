@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/utils/navbar";
-import { UserSync } from "@/components/utils/userSync";
 import "./globals.css";
+import CalendarProvider from "@/lib/contexts/calendarProvider";
+import ClientLayout from "@/components/utils/clientProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,15 +27,15 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <header>
-        <Navbar />
-      </header>
       <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <UserSync />
-          {children}
+          <CalendarProvider>
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </CalendarProvider>
         </body>
       </html>
     </ClerkProvider>

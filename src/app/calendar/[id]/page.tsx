@@ -1,4 +1,5 @@
 'use client'
+import { useCalendarContext } from '@/lib/contexts/calendarContext';
 import { useEffect, use, useReducer } from 'react'
 import { DatabaseEvent, CalendarWithMembers, formatDate } from '@/lib/exports'
 import { createServerClient } from '@/lib/supabase/client'
@@ -11,6 +12,7 @@ import { EventApi } from '@fullcalendar/core/index.js';
 import Loading from '@/components/utils/loading';
 
 const supabase = createServerClient()
+
 
 // custom hook for business logic
 const useCalendarEvents = (id: string) => {
@@ -94,12 +96,13 @@ const useCalendarEvents = (id: string) => {
     }
   }
 
-  const fetchCalendar = async (): Promise<void> => {
+  const fetchCalendar = async (setCalendarName: (name: string) => void): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: { loadingValue: true, message: "Fetching Calendar Info" } })
     try {
       const response = await fetch(`/api/calendars/${id}`)
       const data: { calendar: CalendarWithMembers } = await response.json()
       dispatch({ type: 'SET_PROPERTY', payload: { type: 'calendar', value: data.calendar } })
+      setCalendarName(data.calendar.name)
     } catch (error) {
       console.error('Error fetching calendar:', error)
     } finally {
@@ -183,9 +186,8 @@ const useCalendarEvents = (id: string) => {
   return { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleChangeEvent }
 }
 
-// add loading !
-
 export default function CalendarView({ params }: { params: Promise<{ id: string }> }) {
+  const { setCalendarName } = useCalendarContext()
 
   const { id } = use(params)
   const { state, dispatch, addEvent, handleDelete, fetchCalendar, fetchEvents, setupRealtimeSubscription, handleChangeEvent } = useCalendarEvents(id)
@@ -230,7 +232,7 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
   // }
 
   useEffect(() => {
-    fetchCalendar()
+    fetchCalendar(setCalendarName)
     fetchEvents()
 
     const cleanup = setupRealtimeSubscription()
@@ -239,7 +241,6 @@ export default function CalendarView({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="px-6 pb-6">
-      <h1 className='text-2xl'>{state.calendar?.name}</h1>
 
       {state.loading.isLoading && (<Loading loadingMessage={state.loading.loadingMsg} />)}
 

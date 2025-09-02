@@ -1,48 +1,90 @@
 @import "tailwindcss";
 
+/* 🎨 Theme Variables */
 :root {
-  @apply bg-gray-50
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-primary: #4b5563;
+  --calendar-bg: #1f2937;
+  --modal-bg: #1f2937;
 }
 
+/* 🌍 Global Styles */
 body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background-color: var(--bg-color);
-}
-
-.btn-add-calendar {
-  @apply flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded
-}
-
-.calendar-card {
-  @apply flex bg-gray-800 rounded-md border-l-4 border-pink-600 text-white min-w-sm max-w-4xl hover:bg-gray-700 cursor-pointer
+  @apply m-0 p-0 min-h-screen;
+  background-color: var(--bg-primary);
 }
 
 input {
-  @apply px-2
+  @apply px-2;
 }
 
-.fc-header-toolbar {
-  display: inline-block;
-  padding: 4px 4px;
-  @apply space-x-8
+/* 🔘 Buttons */
+.btn-add-calendar {
+  @apply flex items-center gap-2 px-4 py-2 rounded font-medium text-white bg-purple-600 hover:bg-purple-700;
 }
 
-.fc-day {
-  @apply m-8
+.btn-edit-calendar {
+  @apply flex items-center gap-2 px-4 py-2 rounded font-medium text-white bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)];
 }
 
-.fc-scrollgrid-sync-table {
-  @apply w-full
+.btn-remove-calendar {
+  @apply flex items-center gap-2 px-4 py-2 rounded font-medium text-white bg-red-500 hover:bg-red-600;
 }
 
-.fc-view {
-  @apply w-full h-full bg-white
+/* 📅 Calendar Cards */
+.calendar-card {
+  @apply flex text-white rounded-md border border-white/25 hover:border-purple-500/50 hover:shadow-xl transition-all duration-200 cursor-pointer w-full;
+}
+
+/* 📆 FullCalendar Overrides */
+.fc {
+  @apply transition-colors duration-300 ease-in-out;
+  color: var(--text-primary);
+}
+
+.fc-theme-standard .fc-scrollgrid,
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: var(--border-primary);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  background-color: var(--calendar-bg);
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-primary);
+}
+
+.fc-event,
+.fc-v-event {
+  @apply bg-violet-500 border border-violet-600;
 }
 
 .fc-h-event {
-  @apply bg-violet-500 border border-violet-600
+  @apply bg-violet-500 border border-violet-600;
+}
+
+.fc-header-toolbar {
+  @apply inline-block p-1 space-x-8;
+}
+
+.fc-day {
+  @apply m-8;
+}
+
+.fc-scrollgrid-sync-table,
+.fc-view {
+  @apply w-full;
+}
+
+.fc-view {
+  @apply h-full bg-white;
 }
 
 .fc-view-harness-active {
@@ -50,21 +92,10 @@ input {
 }
 
 .fc .fc-daygrid-day.fc-day-today {
-  @apply bg-violet-400
+  @apply bg-violet-400;
 }
 
-.fc .fc-button {
-  @apply bg-violet-700 hover:bg-violet-900
-}
-
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-  @apply bg-violet-600
-}
-
+.fc .fc-button-primary:not(:disabled).fc-button-active,
 .fc .fc-button-primary:disabled {
-  @apply bg-violet-600
-}
-
-.fc-v-event {
-  @apply bg-violet-500 border border-violet-600
+  @apply bg-violet-600;
 }

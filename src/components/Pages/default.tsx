@@ -7,6 +7,7 @@ import Loading from '../utils/loading'
 import { PencilSquareIcon, PlusIcon, XMarkIcon, ClockIcon } from "@heroicons/react/20/solid"
 import { initialListState } from '@/lib/states/states'
 import ListReducer from '@/lib/reducers/listReducer'
+import Fallback from './noCalendars'
 
 // custom hook for business logic
 const useListFunctions = () => {
@@ -128,55 +129,78 @@ export default function Default() {
     console.error(state.error.errorMessage)
 
   return (
-    <div className="flex justify-center flex-col p-4">
-      <div className='max-w-[1000px] w-full'>
-
-      </div>
-      <h1 className="text-center text-4xl font-bold mb-8"> Calendars</h1>
-
-      <div className="flex justify-end-safe mb-8 gap-2">
-        <button className={`p-2 rounded  text-white ${state.ui.isEditMode ? "bg-red-500 hover:bg-red-600" : "hover:bg-gray-300 dark:hover:bg-gray-700"}`}
-          onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'isEditMode', value: !state.ui.isEditMode } })}>
-          {!state.ui.isEditMode ?
-            <PencilSquareIcon className="h-8 w-8 text-purple-600" />
-            : <XMarkIcon className='h-8 w-8' />}
-        </button>
-        <button className="btn-add-calendar"
-          onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: true } })}>
-          <span className="text-lg"><PlusIcon className="h-6 w-6" /></span>
-          Create
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 justify-items-center-safe gap-4 mx-auto">
-        {
+    <div className="flex justify-center flex-col px-20">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-300">Calendars</h1>{
           state.calendars.length > 0 ? (
-            state.calendars.map((calendar) => {
-              return (
-                <div className="calendar-card" key={calendar.id} onClick={() => !state.ui.isEditMode && navToCalendar(calendar.id)}>
-                  <div className='p-4 flex-1'>
+            <div className="flex items-center gap-3">
 
-                    <h2 className="text-lg text-left font-bold">{calendar.name}</h2>
+              <button className={`${!state.ui.isEditMode ? "btn-edit-calendar" : "btn-remove-calendar"}`}
+                onClick={() => dispatch({ type: 'SET_UI', payload: { ui: 'isEditMode', value: !state.ui.isEditMode } })}>
+                {state.ui.isEditMode ? (
+                  <>
+                    <XMarkIcon className="h-4 w-4" />
+                    <span className="text-md">Delete</span>
+                  </>
+                ) : (
+                  <>
+                    <PencilSquareIcon className="h-4 w-4" />
+                    <span className="text-md">Edit</span>
+                  </>
+                )}
+              </button>
 
-                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-200">
-                      <span> <ClockIcon className='h-4 w-4' /> </span>
-                      Last update:
-                      <span className='font-semibold'>{formatDateTime(calendar.updated_at)} </span>
-                    </div>
-
-                  </div>
-                  {state.ui.isEditMode && (
-                    <button
-                      className="bg-red-500 text-white w-8 h-full flex items-center justify-center rounded-r text-4xl"
-                      onClick={() => removeCalendar(calendar.id)}>
-                      <XMarkIcon className='h-8 w-8' />
-                    </button>
-                  )}
-                </div>
-              )
-            })) : (
-            <div>No calendars found. Add calendars</div>
+              <button
+                className="btn-add-calendar"
+                onClick={() =>
+                  dispatch({
+                    type: "SET_UI",
+                    payload: { ui: "addCalendar", value: true },
+                  })
+                }
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span className="text-md">Create</span>
+              </button>
+            </div>
+          ) : (
+            <></>
           )
+        }
+      </div>
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-auto w-full">
+        {!state.loading.isLoading &&
+          state.calendars.length > 0 ? (
+          state.calendars.map((calendar) => {
+            return (
+              <div className="group calendar-card"
+                key={calendar.id}
+                onClick={() => !state.ui.isEditMode && navToCalendar(calendar.id)}>
+                <div className='p-4 flex-1'>
+
+                  <h2 className="font-semibold text-lg text-card-foreground group-hover:text-purple-400 transition-colors">{calendar.name}</h2>
+
+                  <div className="flex items-center gap-2 mt-2 text-sm text-gray-200">
+                    <span> <ClockIcon className='h-4 w-4' /> </span>
+                    Last update:
+                    <span className='font-semibold'>{formatDateTime(calendar.updated_at)} </span>
+                  </div>
+
+                </div>
+                {state.ui.isEditMode && (
+                  <button
+                    className="bg-red-500 text-white w-8 h-full flex items-center justify-center rounded-r text-4xl"
+                    onClick={() => removeCalendar(calendar.id)}>
+                    <XMarkIcon className='h-8 w-8' />
+                  </button>
+                )}
+              </div>
+            )
+          })) : (
+          <Fallback openModal={() => dispatch({ type: 'SET_UI', payload: { ui: 'addCalendar', value: true } })} />
+        )
         }
       </div>
 
