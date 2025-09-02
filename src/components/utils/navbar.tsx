@@ -25,8 +25,7 @@ export default function Navbar() {
 
   const isCalendarIdPage = pathname.startsWith("/calendar/") && pathname.split("/").length > 0
 
-  const handleInviteUser = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault()
+  const handleInviteUser = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/calendars/${calendarId}/members`, {
         method: 'POST',
